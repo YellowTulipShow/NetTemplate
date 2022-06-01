@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 
 using CommandParameterParse.Attributes;
 
@@ -11,7 +10,7 @@ namespace CommandParameterParse
     /// <summary>
     /// 解析转化器
     /// </summary>
-    public class ParseConverter
+    public class ParseConverter<T> where T : struct
     {
         /// <summary>
         /// 类型处理库对象
@@ -19,147 +18,105 @@ namespace CommandParameterParse
         protected readonly ITypeHandleLibrary typeHandleLibrary;
 
         /// <summary>
+        /// 数据结构编译结果
+        /// </summary>
+        protected readonly DataStructCompileResult<T> compiler;
+
+        /// <summary>
         /// 初始化 - 解析转化器
         /// </summary>
         public ParseConverter(ITypeHandleLibrary typeHandleLibrary)
         {
             this.typeHandleLibrary = typeHandleLibrary;
+            compiler = DataStructCompileResult<T>.Compile();
         }
 
         /// <summary>
-        /// 对于数据进行编译
+        /// 是否需要帮助
         /// </summary>
-        /// <typeparam name="T">需要解析的数据模型</typeparam>
-        /// <returns>编译结果</returns>
-        public ModelCompileResults Compile<T>() where T : struct
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        public bool IsNeedHelp(ParameterFormatResult[] parameter)
         {
-            var r = new ModelCompileResults()
-            {
-                Options = new Dictionary<string, ModelCompileResultsOption>(),
-                Propertys = new Dictionary<string, PropertyInfo>(),
-                Fields = new Dictionary<string, FieldInfo>(),
-            };
-            Type type = typeof(T);
-            foreach (PropertyInfo item in type.GetProperties())
-            {
-                if (!item.CanRead)
-                    continue;
-                var option = CalcOption(item);
-                r.Options[option.FullName] = option;
-                r.Propertys[option.FullName] = item;
-            }
-            foreach (FieldInfo item in type.GetFields())
-            {
-                if (item.IsStatic)
-                    continue;
-                var option = CalcOption(item);
-                r.Options[option.FullName] = option;
-                r.Fields[option.FullName] = item;
-            }
-            return r;
-        }
-        private ModelCompileResultsOption CalcOption(MemberInfo member)
-        {
-            return new ModelCompileResultsOption()
-            {
-                FullName = member.Name,
-                AliasName = member.GetCustomAttribute<AliasNameAttribute>()?.Name,
-                AbbreviationName = member.GetCustomAttribute<AbbreviationNameAttribute>()?.Name,
-            };
+            return parameter.Any(b => b.Name == "h" || b.Name == "help");
         }
 
         /// <summary>
-        /// 转为数据对象
+        /// 打印帮助文档内容
         /// </summary>
-        /// <typeparam name="T">数据结构</typeparam>
-        /// <param name="args">命令行参数输入</param>
+        /// <param name="formatHandles">参数格式处理</param>
+        /// <returns>文档内容</returns>
+        public string[] PrintHelpDocument(IParameterFormatHandle[] formatHandles)
+        {
+            IList<string> lines = new List<string>();
+
+            string command_desc = compiler.StructType.GetCustomAttribute<DescriptionAttribute>()?.Description;
+            if (!string.IsNullOrEmpty(command_desc))
+            {
+                lines.Add($"命令描述:");
+                lines.Add($"\t{command_desc}");
+                lines.Add(string.Empty);
+            }
+
+            lines.Add($"参数:");
+            foreach (var option in compiler.Options.Values)
+            {
+                string names = string.Join(", ", new string[] {
+                    option.AbbreviationName, option.AliasName, option.FullName
+                }.Where(b => string.IsNullOrEmpty(b)).ToArray());
+                lines.Add($"\t名称: {names}");
+                if (option.IsRequired)
+                {
+                    lines.Add($"\t[必填项]");
+                }
+                if (!string.IsNullOrEmpty(option.Description))
+                {
+                    lines.Add($"\t描述: {option.Description}");
+                }
+                lines.Add(string.Empty);
+            }
+
+            lines.Add($"格式描写:");
+            foreach (IParameterFormatHandle formatHandle in formatHandles)
+            {
+                foreach (var line in formatHandle.HelpFormatPrint())
+                {
+                    lines.Add($"\t{line}");
+                }
+                lines.Add(string.Empty);
+            }
+
+            return lines.ToArray();
+        }
+
+        /// <summary>
+        /// 生成数据结构结果值
+        /// </summary>
+        /// <param name="parameter">参数格式结果内容</param>
         /// <returns>结构数据结果</returns>
-        public T ToData<T>(string[] args) where T : struct
+        public T GenerateDataStruct(ParameterFormatResult[] parameter)
         {
             T model = new T();
-            var compiler = Compile<T>();
-            for (int i = 0; i < args.Length; i++)
+            for (int i = 0; i < parameter.Length; i++)
             {
-                (string name, string[] contents) = ParseLine(args[i]);
-                string fullName = GetFullName(compiler, name);
+                var r = parameter[i];
+                string fullName = compiler.GetFullName(r.Name);
                 if (string.IsNullOrEmpty(fullName))
                     continue;
-                if (compiler.Propertys.ContainsKey(fullName))
-                {
-                    var prop = compiler.Propertys[fullName];
-                    var handle = typeHandleLibrary.GetHandle(prop.PropertyType);
-                    object value = handle.To(contents);
-                    prop.SetValue(model, value, null);
-                }
-                else if (compiler.Fields.ContainsKey(fullName))
-                {
-                    var field = compiler.Fields[fullName];
-                    var handle = typeHandleLibrary.GetHandle(field.FieldType);
-                    object value = handle.To(contents);
-                    field.SetValue(model, value);
-                }
+                if (!compiler.Options.ContainsKey(fullName))
+                    continue;
+                DataStructCompileResultOption option = compiler.Options[fullName];
+                if (!compiler.Members.ContainsKey(fullName))
+                    throw new ArgumentOutOfRangeException($"参数全名: [{fullName}] 存在配置但没找到成员内容!");
+                IParameterMemberData member = compiler.Members[fullName];
+                Type member_type = member.GetDataType();
+                ITypeHandle handle = typeHandleLibrary.GetHandle(member_type);
+                object value = handle.To(r.Contents);
+                if (value == null && option.IsRequired)
+                    throw new ArgumentException($"参数: [{fullName}] 需要必填!");
+                member.WriteValue(model, value);
             }
             return model;
         }
-
-        private string GetFullName(ModelCompileResults compiler, string arg_name)
-        {
-            foreach (var option in compiler.Options.Values)
-            {
-                if ((option.FullName ?? "") == arg_name ||
-                    (option.AliasName ?? "") == arg_name ||
-                    (option.AbbreviationName ?? "") == arg_name)
-                    return option.FullName;
-            }
-            return null;
-        }
-
-        private (string name, string[] contents) ParseLine(string arg)
-        {
-            IList<string> name;
-
-            Match m = Regex.Match(arg, @"\-+(\w+)");
-            m = Regex.Match(arg, @"\-+(\w+)=([^\s]+)");
-        }
-    }
-
-
-    /// <summary>
-    /// 数据模型编译结果
-    /// </summary>
-    public struct ModelCompileResults
-    {
-        /// <summary>
-        /// 配置存储 {属性/字段全名, 配置}
-        /// </summary>
-        public IDictionary<string, ModelCompileResultsOption> Options { get; set; }
-
-        /// <summary>
-        /// 属性队列 {全名, 属性信息}
-        /// </summary>
-        public IDictionary<string, PropertyInfo> Propertys { get; set; }
-
-        /// <summary>
-        /// 字段队列 {全名, 字段信息}
-        /// </summary>
-        public IDictionary<string, FieldInfo> Fields { get; set; }
-    }
-    /// <summary>
-    /// 数据模型编译结果-配置型
-    /// </summary>
-    public struct ModelCompileResultsOption
-    {
-        /// <summary>
-        /// 全名
-        /// </summary>
-        public string FullName { get; set; }
-        /// <summary>
-        /// 别名
-        /// </summary>
-        public string AliasName { get; set; }
-        /// <summary>
-        /// 缩写名称
-        /// </summary>
-        public string AbbreviationName { get; set; }
     }
 }

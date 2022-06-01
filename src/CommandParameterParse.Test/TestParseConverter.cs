@@ -20,7 +20,6 @@ namespace CommandParameterParse.Test
         [TestMethod]
         public void TestToData()
         {
-            var parse = new ParseConverter();
             string[] args = new string[] {
                 @"--root=d:\_code_test",
                 @"--TemplatePath=template/Controller.cs",
@@ -28,7 +27,16 @@ namespace CommandParameterParse.Test
                 @"--data:database=e:\db\admin.json",
                 @"--data:table=data/users.json",
             };
-            TestArgsModel m = parse.ToData<TestArgsModel>(args);
+            var parameterFormatParse = new ParameterFormatParse(new List<IParameterFormatHandle>()
+            {
+            });
+            ParameterFormatResult[] parameter = parameterFormatParse.ExplainExecution(args);
+
+
+            ITypeHandleLibrary handleLibrary = new TypeHandleLibrary();
+            var parse = new ParseConverter<TestArgsModel>(handleLibrary);
+            TestArgsModel m = parse.GenerateDataStruct();
+
             Assert.AreEqual(@"d:\_code_test", m.RootDire);
             Assert.AreEqual(@"template/Controller.cs", m.TemplatePath);
             Assert.AreEqual(@"d:\_result\code\UsersController.cs", m.OutputPath);
