@@ -20,7 +20,7 @@ namespace CommandParameterParse
         /// <summary>
         /// 数据结构编译结果
         /// </summary>
-        protected readonly DataStructCompileResult<T> compiler;
+        protected readonly StructCompileResult<T> compiler;
 
         /// <summary>
         /// 初始化 - 解析转化器
@@ -28,7 +28,7 @@ namespace CommandParameterParse
         public ParseConverter(ITypeHandleLibrary typeHandleLibrary)
         {
             this.typeHandleLibrary = typeHandleLibrary;
-            compiler = DataStructCompileResult<T>.Compile();
+            compiler = StructCompileResult<T>.Compile();
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace CommandParameterParse
                     continue;
                 if (!compiler.Options.ContainsKey(fullName))
                     continue;
-                DataStructCompileResultOption option = compiler.Options[fullName];
+                StructCompileResultOption option = compiler.Options[fullName];
                 if (!compiler.Members.ContainsKey(fullName))
                     throw new ArgumentOutOfRangeException($"参数全名: [{fullName}] 存在配置但没找到成员内容!");
                 IParameterMemberData member = compiler.Members[fullName];

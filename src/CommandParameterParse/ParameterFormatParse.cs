@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 
+using CommandParameterParse.ParameterFormatHandles;
+
 namespace CommandParameterParse
 {
     /// <summary>
@@ -20,6 +22,7 @@ namespace CommandParameterParse
         {
             handles = new List<IParameterFormatHandle>()
             {
+                new HorizontalLineParameterFormatHandle(),
             };
         }
         /// <summary>

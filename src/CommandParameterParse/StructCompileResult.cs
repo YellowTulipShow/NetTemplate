@@ -10,7 +10,7 @@ namespace CommandParameterParse
     /// <summary>
     /// 数据模型编译结果
     /// </summary>
-    public struct DataStructCompileResult<T> where T : struct
+    public struct StructCompileResult<T> where T : struct
     {
         /// <summary>
         /// 数据结构类型
@@ -20,7 +20,7 @@ namespace CommandParameterParse
         /// <summary>
         /// 配置存储 {属性/字段全名, 配置}
         /// </summary>
-        public IDictionary<string, DataStructCompileResultOption> Options { get; set; }
+        public IDictionary<string, StructCompileResultOption> Options { get; set; }
 
         /// <summary>
         /// 属性队列 {全名, 数据值}
@@ -48,13 +48,13 @@ namespace CommandParameterParse
         /// 对于数据进行编译
         /// </summary>
         /// <returns>编译结果</returns>
-        public static DataStructCompileResult<T> Compile()
+        public static StructCompileResult<T> Compile()
         {
             Type type = typeof(T);
-            var r = new DataStructCompileResult<T>()
+            var r = new StructCompileResult<T>()
             {
                 StructType = type,
-                Options = new Dictionary<string, DataStructCompileResultOption>(),
+                Options = new Dictionary<string, StructCompileResultOption>(),
                 Members = new Dictionary<string, IParameterMemberData>(),
             };
             foreach (PropertyInfo item in type.GetProperties())
@@ -75,9 +75,9 @@ namespace CommandParameterParse
             }
             return r;
         }
-        private static DataStructCompileResultOption CalcOption(MemberInfo member)
+        private static StructCompileResultOption CalcOption(MemberInfo member)
         {
-            return new DataStructCompileResultOption()
+            return new StructCompileResultOption()
             {
                 FullName = member.Name,
                 AliasName = member.GetCustomAttribute<AliasNameAttribute>()?.Name,
@@ -91,7 +91,7 @@ namespace CommandParameterParse
     /// <summary>
     /// 数据模型编译结果-配置型
     /// </summary>
-    public struct DataStructCompileResultOption
+    public struct StructCompileResultOption
     {
         /// <summary>
         /// 全名
