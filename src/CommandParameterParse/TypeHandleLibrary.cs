@@ -19,18 +19,21 @@ namespace CommandParameterParse
         public TypeHandleLibrary()
         {
             dictHandle = new Dictionary<string, ITypeHandle>();
+            Register(new StringHandle());
         }
 
-        private void RegisterDefaultHandles()
+        private string GetSign(Type type)
         {
-            RegisterHandle(new StringHandle());
+            return type.FullName;
         }
-        private void RegisterHandle(ITypeHandle handle)
+
+        /// <inheritdoc/>
+        public void Register(ITypeHandle typeHandle)
         {
-            if (handle == null)
+            if (typeHandle == null)
                 return;
-            string sign = GetSign(handle.Identification());
-            dictHandle[sign] = handle;
+            string sign = GetSign(typeHandle.Identification());
+            dictHandle[sign] = typeHandle;
         }
 
         /// <inheritdoc/>
@@ -42,11 +45,6 @@ namespace CommandParameterParse
                 return dictHandle[sign];
             };
             return null;
-        }
-
-        private string GetSign(Type type)
-        {
-            return type.FullName;
         }
     }
 }

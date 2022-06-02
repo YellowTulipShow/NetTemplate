@@ -27,21 +27,15 @@ namespace CommandParameterParse.Test
                 @"--data:database=e:\db\admin.json",
                 @"--data:table=data/users.json",
             };
-            var parameterFormatParse = new ParameterFormatParse(new List<IParameterFormatHandle>()
+            ICommandParse<TestArgsModel> commandParse = new CommandParse<TestArgsModel>();
+            commandParse.OnExecute(args, m =>
             {
+                Assert.AreEqual(@"d:\_code_test", m.RootDire);
+                Assert.AreEqual(@"template/Controller.cs", m.TemplatePath);
+                Assert.AreEqual(@"d:\_result\code\UsersController.cs", m.OutputPath);
+                Assert.AreEqual(@"e:\db\admin.json", m.DataJSONPaths[@"database"]);
+                Assert.AreEqual(@"data/users.json", m.DataJSONPaths[@"table"]);
             });
-            ParameterFormatResult[] parameter = parameterFormatParse.ExplainExecution(args);
-
-
-            ITypeHandleLibrary handleLibrary = new TypeHandleLibrary();
-            var parse = new ParseConverter<TestArgsModel>(handleLibrary);
-            TestArgsModel m = parse.GenerateDataStruct();
-
-            Assert.AreEqual(@"d:\_code_test", m.RootDire);
-            Assert.AreEqual(@"template/Controller.cs", m.TemplatePath);
-            Assert.AreEqual(@"d:\_result\code\UsersController.cs", m.OutputPath);
-            Assert.AreEqual(@"e:\db\admin.json", m.DataJSONPaths[@"database"]);
-            Assert.AreEqual(@"data/users.json", m.DataJSONPaths[@"table"]);
         }
     }
 }

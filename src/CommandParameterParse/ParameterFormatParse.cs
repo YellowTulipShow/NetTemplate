@@ -20,10 +20,6 @@ namespace CommandParameterParse
         /// </summary>
         public ParameterFormatParse()
         {
-            handles = new List<IParameterFormatHandle>()
-            {
-                new HorizontalLineParameterFormatHandle(),
-            };
         }
         /// <summary>
         /// 实例化 - 命令格式解析帮助类
