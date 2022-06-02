@@ -83,7 +83,7 @@ namespace CommandParameterParse
                 AliasName = member.GetCustomAttribute<AliasNameAttribute>()?.Name,
                 AbbreviationName = member.GetCustomAttribute<AbbreviationNameAttribute>()?.Name,
                 IsRequired = member.GetCustomAttribute<IsRequiredAttribute>()?.IsRequired ?? false,
-                Description = member.GetCustomAttribute<DescriptionAttribute>()?.Description ?? false,
+                Description = member.GetCustomAttribute<DescriptionAttribute>()?.Description ?? string.Empty,
             };
         }
     }

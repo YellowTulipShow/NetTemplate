@@ -6,6 +6,9 @@
     public class StringHandle : AbsTypeHandle<string>
     {
         /// <inheritdoc/>
-        public override string To(string str) => str;
+        public override string To(string[] strs)
+        {
+            return string.Join("", strs);
+        }
     }
 }

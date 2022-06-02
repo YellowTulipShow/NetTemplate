@@ -23,6 +23,7 @@ namespace CommandParameterParse
         {
             structCompile = StructCompileResult<T>.Compile();
             typeHandleLibrary = new TypeHandleLibrary();
+            formatHandles = new List<IParameterFormatHandle>();
             InitDefaultConfigs();
         }
 
@@ -66,6 +67,7 @@ namespace CommandParameterParse
             catch (Exception ex)
             {
                 Console.WriteLine($"错误: {ex.Message}");
+                throw ex;
             }
         }
 
@@ -143,6 +145,8 @@ namespace CommandParameterParse
                 IParameterMemberData member = structCompile.Members[fullName];
                 Type member_type = member.GetDataType();
                 ITypeHandle handle = typeHandleLibrary.GetHandle(member_type);
+                if (handle == null)
+                    throw new NullReferenceException($"参数: [{fullName}] 所属的数据类型: {member_type.FullName} 无法识别!");
                 object value = handle.To(r.Contents);
                 if (value == null && option.IsRequired)
                     throw new ArgumentException($"参数: [{fullName}] 需要必填!");

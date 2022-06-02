@@ -3,17 +3,24 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 
+using CommandParameterParse.Attributes;
+
 namespace CommandParameterParse.Test
 {
     [TestClass]
     public class TestParseConverter
     {
-
         private struct TestArgsModel
         {
+            [AbbreviationName("root")]
             public string RootDire;
+
             public string TemplatePath { get; set; }
+
+            [AbbreviationName("output")]
             public string OutputPath { get; set; }
+
+            [AbbreviationName("data")]
             public IDictionary<string, string> DataJSONPaths { get; set; }
         }
 
