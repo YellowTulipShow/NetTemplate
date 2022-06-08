@@ -3,24 +3,24 @@
 namespace CommandParameterParse.ParameterFormatHandles
 {
     /// <summary>
-    /// 横线常规参数格式解析: --{参数名称}={内容}, 如: --name=张三
+    /// 缩写参数格式解析: -{参数缩写} {内容}, 如: -n 张三
     /// </summary>
-    public class HorizontalLineParameterFormatHandle : IParameterFormatHandle
+    public class AbbreviationParameterFormatHandle : IParameterFormatHandle
     {
         private readonly Regex re_is_name;
         private readonly Regex re_get_content;
 
         /// <summary>
-        /// 实例化: 横线常规参数格式解析: --{参数名称}={内容}, 如: --name=张三
+        /// 实例化: 缩写参数格式解析: -{参数缩写} {内容}, 如: -n 张三
         /// </summary>
-        public HorizontalLineParameterFormatHandle()
+        public AbbreviationParameterFormatHandle()
         {
-            re_is_name = new Regex(@"^\-{2}([a-zA-Z]+)[^a-zA-Z]*");
-            re_get_content = new Regex(@"^\-{2}([a-zA-Z]+)(=|\s+)['""]{0,1}([^\n\r'""]+)['""]{0,1}$");
+            re_is_name = new Regex(@"^\-([a-zA-Z])[^a-zA-Z]*");
+            re_get_content = new Regex(@"^\-([a-zA-Z])(=|\s+)['""]{0,1}([^\n\r'""]+)['""]{0,1}$");
         }
 
         /// <inheritdoc/>
-        public virtual bool IsParameter(string region, out string name)
+        public bool IsParameter(string region, out string name)
         {
             Match match = re_is_name.Match(region);
             name = match.Success ? match.Groups[1].Value : null;
@@ -28,18 +28,18 @@ namespace CommandParameterParse.ParameterFormatHandles
         }
 
         /// <inheritdoc/>
-        public virtual string ExtractContent(string region)
+        public string ExtractContent(string region)
         {
             Match match = re_get_content.Match(region);
             return match.Success ? match.Groups[3].Value : region;
         }
 
         /// <inheritdoc/>
-        public virtual string[] HelpFormatPrint()
+        public string[] HelpFormatPrint()
         {
             return new string[] {
-                $"--<名称> <参数内容>",
-                $"--<名称>=<参数内容>",
+                $"-<缩写> <参数内容>",
+                $"-<缩写>=<参数内容>",
             };
         }
     }

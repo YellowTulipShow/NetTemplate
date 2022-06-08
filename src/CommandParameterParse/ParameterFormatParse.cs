@@ -44,32 +44,40 @@ namespace CommandParameterParse
         public ParameterFormatResult[] ExplainExecution(string[] args)
         {
             IList<ParameterFormatResult> rlist = new List<ParameterFormatResult>();
-            string OldName = null;
+            string old_name = null;
             IList<string> contents = null;
             for (int i_arg = 0; i_arg < args.Length; i_arg++)
             {
                 string arg_region = args[i_arg];
-                if (IsParameterStart(arg_region,
-                    out string Name,
-                    out IParameterFormatHandle handle))
+                if (IsParameterStart(arg_region, out string name, out IParameterFormatHandle handle))
                 {
-                    if (contents != null)
-                        rlist.Add(new ParameterFormatResult()
-                        {
-                            Name = OldName,
-                            Contents = contents.ToArray(),
-                        });
-                    OldName = Name;
-                    contents = new List<string>();
-                }
-                if (handle != null)
-                {
-                    string content = handle.ExtractContent(arg_region);
-                    if (content != null)
+                    if (name != old_name)
                     {
-                        contents?.Add(content);
+                        if (!string.IsNullOrEmpty(old_name))
+                        {
+                            rlist.Add(new ParameterFormatResult()
+                            {
+                                Name = old_name,
+                                Contents = contents.ToArray(),
+                            });
+                        }
+                        old_name = name;
+                        contents = new List<string>();
                     }
                 }
+                string content = handle?.ExtractContent(arg_region);
+                if (content != null)
+                {
+                    contents?.Add(content);
+                }
+            }
+            if (!string.IsNullOrEmpty(old_name))
+            {
+                rlist.Add(new ParameterFormatResult()
+                {
+                    Name = old_name,
+                    Contents = contents.ToArray(),
+                });
             }
             return rlist.ToArray();
         }
