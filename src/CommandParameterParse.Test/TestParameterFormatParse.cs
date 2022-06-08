@@ -47,12 +47,12 @@ namespace CommandParameterParse.Test
         public void TestRender_HorizontalLineParameterFormatHandle()
         {
             string[] args = new string[] {
-                @"--q=张三q",
-                @"--w='张三w'",
-                @"--e=""张三e""",
-                @"--r 张三r",
-                @"--t '张三t'",
-                @"--y ""张三y""",
+                @"--qname=张三qname",
+                @"--wname='张三wname'",
+                @"--ename=""张三ename""",
+                @"--rname 张三rname",
+                @"--tname '张三tname'",
+                @"--yname ""张三yname""",
             };
             IList<IParameterFormatHandle> formatHandles = new List<IParameterFormatHandle>
             {
@@ -66,11 +66,11 @@ namespace CommandParameterParse.Test
                 ParameterFormatResult param = parameters[i];
                 Assert.IsNotNull(param);
                 string key =
-                    i == 0 ? "q" :
-                    i == 1 ? "w" :
-                    i == 2 ? "e" :
-                    i == 3 ? "r" :
-                    i == 4 ? "t" : "y";
+                    i == 0 ? "qname" :
+                    i == 1 ? "wname" :
+                    i == 2 ? "ename" :
+                    i == 3 ? "rname" :
+                    i == 4 ? "tname" : "yname";
                 Assert.AreEqual(key, param.Name);
                 Assert.IsNotNull(param.Contents);
                 Assert.AreEqual(1, param.Contents.Length);
@@ -111,6 +111,44 @@ namespace CommandParameterParse.Test
                 Assert.AreEqual(@"table=data/users.json", param.Contents[1]);
                 Assert.AreEqual(@"info=users_info.json", param.Contents[2]);
             }
+        }
+
+
+        [TestMethod]
+        public void TestRender_MergeTotal()
+        {
+            string[] args = new string[] {
+                @"-q=张三q",
+                @"-w='张三w'",
+                @"-e=""张三e""",
+                @"-r 张三r",
+                @"-t '张三t'",
+                @"-y ""张三y""",
+
+                @"--qname=张三qname",
+                @"--wname='张三wname'",
+                @"--ename=""张三ename""",
+                @"--rname 张三rname",
+                @"--tname '张三tname'",
+                @"--yname ""张三yname""",
+
+                @"--data",
+                @"database=""e:\db\admin.json""",
+                @"table='data/users.json'",
+                @"info=users_info.json",
+                @"--names",
+                @"database:""e:\db\admin.json""",
+                @"table:'data/users.json'",
+                @"info:users_info.json",
+            };
+            IList<IParameterFormatHandle> formatHandles = new List<IParameterFormatHandle>
+            {
+                new ParameterFormatHandles.AbbreviationParameterFormatHandle(),
+                new ParameterFormatHandles.HorizontalLineParameterFormatHandle(),
+                new ParameterFormatHandles.KeyValueParameterFormatHandle(),
+            };
+            ParameterFormatResult[] parameters = ParameterFormatParse.Render(args, formatHandles);
+            var dict_param = parameters.ToDictionary(b => b.Name);
         }
     }
 }

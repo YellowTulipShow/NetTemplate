@@ -46,23 +46,30 @@ namespace CommandParameterParse
             IList<ParameterFormatResult> rlist = new List<ParameterFormatResult>();
             string old_name = null;
             IList<string> contents = null;
+            IParameterFormatHandle handle = null;
             for (int i_arg = 0; i_arg < args.Length; i_arg++)
             {
                 string arg_region = args[i_arg];
-                if (IsParameterStart(arg_region, out string name, out IParameterFormatHandle handle))
+                for (int i_handle = handles.Count - 1; i_handle >= 0; i_handle--)
                 {
-                    if (name != old_name)
+                    var handle_item = handles[i_handle];
+                    if (handle_item.IsParameter(arg_region, out string name))
                     {
-                        if (!string.IsNullOrEmpty(old_name))
+                        if (name != old_name)
                         {
-                            rlist.Add(new ParameterFormatResult()
+                            if (!string.IsNullOrEmpty(old_name))
                             {
-                                Name = old_name,
-                                Contents = contents.ToArray(),
-                            });
+                                rlist.Add(new ParameterFormatResult()
+                                {
+                                    Name = old_name,
+                                    Contents = contents.ToArray(),
+                                });
+                            }
+                            old_name = name;
+                            contents = new List<string>();
                         }
-                        old_name = name;
-                        contents = new List<string>();
+                        handle = handle_item;
+                        break;
                     }
                 }
                 string content = handle?.ExtractContent(arg_region);
@@ -80,22 +87,6 @@ namespace CommandParameterParse
                 });
             }
             return rlist.ToArray();
-        }
-
-        private bool IsParameterStart(string region, out string name, out IParameterFormatHandle handle)
-        {
-            for (int i_handle = handles.Count - 1; i_handle >= 0; i_handle--)
-            {
-                var handle_item = handles[i_handle];
-                if (handle_item.IsParameter(region, out name))
-                {
-                    handle = handle_item;
-                    return true;
-                }
-            }
-            name = string.Empty;
-            handle = null;
-            return false;
         }
 
         /// <summary>
