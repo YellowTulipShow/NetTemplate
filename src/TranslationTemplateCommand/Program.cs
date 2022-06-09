@@ -12,19 +12,12 @@ namespace TranslationTemplateCommand
 {
     public class Program : ICommandParseHelpPrint
     {
-        private static string GetLogFilePath(string name)
-        {
-            return Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                $"logs/{name}/{DateTime.Now:yyyy_MM_dd}.log");
-        }
-
         static void Main(string[] args)
         {
             Encoding encoding = Encoding.UTF8;
 
-            var logFile = new FileInfo(GetLogFilePath("TranslationTemplateCommand"));
-            ILog log = new FilePrintLog(logFile.FullName, encoding)
+            var logFile = ILogExtend.GetLogFilePath("TranslationTemplateCommand");
+            ILog log = new FilePrintLog(logFile, encoding)
                 .Connect(new ConsolePrintLog());
             var logArgs = log.CreateArgDictionary();
             logArgs["CommandInputArgs"] = args;
