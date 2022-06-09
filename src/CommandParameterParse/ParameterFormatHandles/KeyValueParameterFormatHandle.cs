@@ -31,9 +31,7 @@ namespace CommandParameterParse.ParameterFormatHandles
         public string ExtractContent(string region)
         {
             if (re_is_name.IsMatch(region))
-            {
                 return null;
-            }
             Match match = re_get_content.Match(region);
             if (match.Success)
             {

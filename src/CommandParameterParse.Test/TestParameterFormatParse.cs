@@ -1,6 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using System.Linq;
 using System.Collections.Generic;
 
 namespace CommandParameterParse.Test
@@ -15,9 +14,12 @@ namespace CommandParameterParse.Test
                 @"-q=张三q",
                 @"-w='张三w'",
                 @"-e=""张三e""",
-                @"-r 张三r",
-                @"-t '张三t'",
-                @"-y ""张三y""",
+                @"-r",
+                @"张三r",
+                @"-t",
+                @"'张三t'",
+                @"-y",
+                @"""张三y""",
             };
             IList<IParameterFormatHandle> formatHandles = new List<IParameterFormatHandle>
             {
@@ -50,9 +52,12 @@ namespace CommandParameterParse.Test
                 @"--qname=张三qname",
                 @"--wname='张三wname'",
                 @"--ename=""张三ename""",
-                @"--rname 张三rname",
-                @"--tname '张三tname'",
-                @"--yname ""张三yname""",
+                @"--rname",
+                @"张三rname",
+                @"--tname",
+                @"'张三tname'",
+                @"--yname",
+                @"""张三yname""",
             };
             IList<IParameterFormatHandle> formatHandles = new List<IParameterFormatHandle>
             {
@@ -148,7 +153,25 @@ namespace CommandParameterParse.Test
                 new ParameterFormatHandles.KeyValueParameterFormatHandle(),
             };
             ParameterFormatResult[] parameters = ParameterFormatParse.Render(args, formatHandles);
-            var dict_param = parameters.ToDictionary(b => b.Name);
+            Assert.AreEqual(14, parameters.Length);
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var parm = parameters[i];
+                Assert.IsNotNull(parm);
+                if (i >= 12)
+                {
+                    Assert.AreEqual(i == 12 ? "data" : "names", parm.Name);
+                    Assert.AreEqual(3, parm.Contents.Length);
+                    Assert.AreEqual(@"database=e:\db\admin.json", parm.Contents[0]);
+                    Assert.AreEqual(@"table=data/users.json", parm.Contents[1]);
+                    Assert.AreEqual(@"info=users_info.json", parm.Contents[2]);
+                }
+                else
+                {
+                    Assert.AreEqual(1, parm.Contents.Length);
+                    Assert.AreEqual($"张三{parm.Name}", parm.Contents[0]);
+                }
+            }
         }
     }
 }

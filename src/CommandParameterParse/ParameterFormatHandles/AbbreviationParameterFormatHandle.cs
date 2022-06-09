@@ -7,6 +7,7 @@ namespace CommandParameterParse.ParameterFormatHandles
     /// </summary>
     public class AbbreviationParameterFormatHandle : IParameterFormatHandle
     {
+        private readonly Regex re_only_name;
         private readonly Regex re_is_name;
         private readonly Regex re_get_content;
 
@@ -15,6 +16,7 @@ namespace CommandParameterParse.ParameterFormatHandles
         /// </summary>
         public AbbreviationParameterFormatHandle()
         {
+            re_only_name = new Regex(@"^\-([a-zA-Z])$");
             re_is_name = new Regex(@"^\-([a-zA-Z])[^a-zA-Z]*");
             re_get_content = new Regex(@"^\-([a-zA-Z])(=|\s+)['""]{0,1}([^\n\r'""]+)['""]{0,1}$");
         }
@@ -30,8 +32,11 @@ namespace CommandParameterParse.ParameterFormatHandles
         /// <inheritdoc/>
         public string ExtractContent(string region)
         {
+            if (re_only_name.IsMatch(region))
+                return null;
             Match match = re_get_content.Match(region);
-            return match.Success ? match.Groups[3].Value : region;
+            return match.Success ? match.Groups[3].Value :
+                region?.Trim('\'').Trim('"');
         }
 
         /// <inheritdoc/>

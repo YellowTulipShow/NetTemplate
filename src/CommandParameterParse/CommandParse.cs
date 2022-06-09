@@ -33,6 +33,7 @@ namespace CommandParameterParse
         protected virtual void InitDefaultConfigs()
         {
             typeHandleLibrary.Register(new TypeHandles.StringHandle());
+            formatHandles.Add(new ParameterFormatHandles.AbbreviationParameterFormatHandle());
             formatHandles.Add(new ParameterFormatHandles.HorizontalLineParameterFormatHandle());
         }
 

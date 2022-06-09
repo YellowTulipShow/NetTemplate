@@ -13,15 +13,18 @@ namespace CommandParameterParse.Test
     {
         private struct TestArgsModel
         {
-            [AbbreviationName("root")]
+            [AbbreviationName('r')]
+            [AliasName("root")]
             public string RootDire;
 
             public string TemplatePath { get; set; }
 
-            [AbbreviationName("output")]
+            [AbbreviationName('o')]
+            [AliasName("output")]
             public string OutputPath { get; set; }
 
-            [AbbreviationName("data")]
+            [AbbreviationName('d')]
+            [AliasName("data")]
             public IDictionary<string, string> DataJSONPaths { get; set; }
         }
 
@@ -50,14 +53,18 @@ namespace CommandParameterParse.Test
         public void TestToData()
         {
             string[] args = new string[] {
-                @"--root=d:\_code_test",
-                @"--TemplatePath=template/Controller.cs",
+                @"-r",
+                @"d:\_code_test",
+                @"--TemplatePath",
+                @"template/Controller.cs",
                 @"--output=d:\_result\code\UsersController.cs",
-                @"--data:database=e:\db\admin.json",
-                @"--data:table=data/users.json",
+                @"--data",
+                @"database=e:\db\admin.json",
+                @"table=data/users.json",
             };
             ICommandParse<TestArgsModel> commandParse = new CommandParse<TestArgsModel>();
             commandParse.RegisterITypeHandle(new DictType());
+            commandParse.RegisterIParameterFormatHandle(new ParameterFormatHandles.KeyValueParameterFormatHandle());
             commandParse.OnExecute(args, m =>
             {
                 Assert.AreEqual(@"d:\_code_test", m.RootDire);

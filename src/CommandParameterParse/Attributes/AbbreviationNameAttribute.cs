@@ -8,6 +8,6 @@
         /// <summary>
         /// 注入: 缩写名称
         /// </summary>
-        public AbbreviationNameAttribute(string name) : base(name) { }
+        public AbbreviationNameAttribute(char name) : base(name.ToString()) { }
     }
 }
