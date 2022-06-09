@@ -21,8 +21,10 @@ namespace CommandParameterParse
         /// <summary>
         /// 写入数据值
         /// </summary>
+        /// <typeparam name="T">数据类型</typeparam>
         /// <param name="model">写入目标对象</param>
         /// <param name="value">写入值</param>
-        void WriteValue(object model, object value);
+        /// <returns>写入目标对象赋值后返回</returns>
+        object WriteValue(object model, object value);
     }
 }

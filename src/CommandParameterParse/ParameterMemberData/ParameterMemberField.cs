@@ -32,9 +32,10 @@ namespace CommandParameterParse.ParameterMemberData
         }
 
         /// <inheritdoc/>
-        public void WriteValue(object model, object value)
+        public object WriteValue(object model, object value)
         {
             field.SetValue(model, value);
+            return model;
         }
     }
 }

@@ -151,7 +151,7 @@ namespace CommandParameterParse
                 object value = handle.To(r.Contents);
                 if (value == null && option.IsRequired)
                     throw new ArgumentException($"参数: [{fullName}] 需要必填!");
-                member.WriteValue(model, value);
+                model = (T)member.WriteValue(model, value);
             }
             return model;
         }
