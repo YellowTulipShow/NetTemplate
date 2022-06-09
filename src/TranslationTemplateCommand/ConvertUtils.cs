@@ -68,6 +68,7 @@ namespace TranslationTemplateCommand
                     traget_file.Create().Close();
                 }
                 File.WriteAllText(traget_file.FullName, result_content, encoding);
+                log.Info($"Generate File Success: {traget_file.FullName}");
             }
             catch (Exception ex)
             {
