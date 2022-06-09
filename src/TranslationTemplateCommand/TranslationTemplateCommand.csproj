@@ -1,17 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Title>转换解析模板命令</Title>
+        <PackageId>TranslationTemplateCommand</PackageId>
+        <Version>0.0.1</Version>
+        <Authors>YellowTulipShow</Authors>
+        <Description>基于开源软件: Fluid.Core 实现的转换模板命令</Description>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>ctemp</ToolCommandName>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Fluid.Core" Version="2.2.15" />
-    <PackageReference Include="YTS.Log" Version="0.1.2" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Fluid.Core" Version="2.2.15" />
+        <PackageReference Include="YTS.Log" Version="0.1.2" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CommandParameterParse\CommandParameterParse.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\CommandParameterParse\CommandParameterParse.csproj" />
+    </ItemGroup>
 
 </Project>

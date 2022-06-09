@@ -50,6 +50,34 @@ if (Test-Path $config_apps) {
     New-Item -ItemType File -Force -Path $config_apps
 }
 
+# 打包项目
+$config_packages = "./_configs/packages.config"
+$save_path_packages = "./_release/packages"
+if (Test-Path $save_path_packages) {
+    Remove-Item -Recurse -Force $save_path_packages
+}
+if (Test-Path $config_packages) {
+    $list = Get-Content $config_packages
+    for ($i = 0; $i -lt $list.Count; $i++) {
+        if ($list.Count -eq 1) {
+            $item = $list;
+        } else {
+            $item = $list[$i]
+        }
+        if (!$item) {
+            continue;
+        }
+        # 打包项目
+        Write-Output "dotnet build $item"
+        dotnet build $item
+        Write-Output "dotnet pack $item --output '$save_path_packages'"
+        dotnet pack $item --output "$save_path_packages"
+    }
+} else {
+    Write-Output "Pack Package Config File Not Existent: $config_packages"
+    New-Item -ItemType File -Force -Path $config_packages
+}
+
 Set-Location $ExecutePath
 if ($PSScriptRoot -eq $ExecutePath) {
     timeout.exe /T -1
