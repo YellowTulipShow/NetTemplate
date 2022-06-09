@@ -1,26 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+
+using CommandParameterParse.Attributes;
 
 namespace CommandParameterParse
 {
     /// <inheritdoc/>
-    public class CommandParse<T> : ICommandParse<T> where T: struct
+    public class CommandParse<T> : ICommandParse<T> where T : struct
     {
-        /// <inheritdoc/>
+        /// <summary>
+        /// 帮助输出处理接口
+        /// </summary>
+        protected readonly ICommandParseHelpPrint helpPrint;
+        /// <summary>
+        /// 数据模型编译结果
+        /// </summary>
         protected readonly StructCompileResult<T> structCompile;
-        /// <inheritdoc/>
+        /// <summary>
+        /// 各字段属性数据类型处理方法库
+        /// </summary>
         protected readonly ITypeHandleLibrary typeHandleLibrary;
-        /// <inheritdoc/>
+        /// <summary>
+        /// 命令参数格式处理集合
+        /// </summary>
         protected readonly IList<IParameterFormatHandle> formatHandles;
 
         /// <summary>
         /// 实例化 - 命令解析实现类
         /// </summary>
-        public CommandParse()
+        public CommandParse(ICommandParseHelpPrint helpPrint)
         {
+            this.helpPrint = helpPrint;
             structCompile = StructCompileResult<T>.Compile();
             typeHandleLibrary = new TypeHandleLibrary();
             formatHandles = new List<IParameterFormatHandle>();
@@ -58,8 +70,7 @@ namespace CommandParameterParse
                 if (CheckIsHelp(parameters))
                 {
                     string[] textlines = PrintHelpDocument();
-                    foreach (string line in textlines)
-                        Console.WriteLine(line);
+                    helpPrint.Prints(textlines);
                     return;
                 }
                 T m = GenerateDataStruct(parameters);
@@ -84,12 +95,11 @@ namespace CommandParameterParse
         {
             IList<string> lines = new List<string>();
 
-            string command_desc = structCompile.StructType
-                .GetCustomAttribute<DescriptionAttribute>()?.Description;
-            if (!string.IsNullOrEmpty(command_desc))
+            if ((structCompile.Descriptions?.Length ?? 0) > 0)
             {
                 lines.Add($"命令描述:");
-                lines.Add($"\t{command_desc}");
+                foreach (string desc in structCompile.Descriptions)
+                    lines.Add($"\t{desc}");
                 lines.Add(string.Empty);
             }
 
@@ -98,15 +108,17 @@ namespace CommandParameterParse
             {
                 string names = string.Join(", ", new string[] {
                     option.AbbreviationName, option.AliasName, option.FullName
-                }.Where(b => string.IsNullOrEmpty(b)).ToArray());
+                }.Where(b => !string.IsNullOrEmpty(b)).ToArray());
                 lines.Add($"\t名称: {names}");
                 if (option.IsRequired)
                 {
                     lines.Add($"\t[必填项]");
                 }
-                if (!string.IsNullOrEmpty(option.Description))
+                if ((option.Descriptions?.Length ?? 0) > 0)
                 {
-                    lines.Add($"\t描述: {option.Description}");
+                    lines.Add($"\t命令描述:");
+                    foreach (string desc in option.Descriptions)
+                        lines.Add($"\t\t{desc}");
                 }
                 lines.Add(string.Empty);
             }

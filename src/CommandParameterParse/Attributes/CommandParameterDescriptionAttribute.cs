@@ -3,16 +3,16 @@
 namespace CommandParameterParse.Attributes
 {
     /// <summary>
-    /// 参数配置: 描述
+    /// 参数配置: 描述 (允许多行配置)
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Struct,
-        AllowMultiple = false, Inherited = true)]
-    public class DescriptionAttribute : Attribute
+        AllowMultiple = true, Inherited = true)]
+    public class CommandParameterDescriptionAttribute : Attribute
     {
         /// <summary>
         /// 注入: 描述
         /// </summary>
-        public DescriptionAttribute(string Description)
+        public CommandParameterDescriptionAttribute(string Description)
         {
             this.Description = Description;
         }

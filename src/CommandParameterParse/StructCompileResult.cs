@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -16,6 +17,11 @@ namespace CommandParameterParse
         /// 数据结构类型
         /// </summary>
         public Type StructType { get; set; }
+
+        /// <summary>
+        /// 描述
+        /// </summary>
+        public string[] Descriptions { get; set; }
 
         /// <summary>
         /// 配置存储 {属性/字段全名, 配置}
@@ -56,6 +62,9 @@ namespace CommandParameterParse
                 StructType = type,
                 Options = new Dictionary<string, StructCompileResultOption>(),
                 Members = new Dictionary<string, IParameterMemberData>(),
+                Descriptions = type.GetCustomAttributes<CommandParameterDescriptionAttribute>()
+                    ?.Select(attr => attr.Description)
+                    ?.ToArray() ?? new string[] { },
             };
             foreach (PropertyInfo item in type.GetProperties())
             {
@@ -83,7 +92,9 @@ namespace CommandParameterParse
                 AliasName = member.GetCustomAttribute<AliasNameAttribute>()?.Name,
                 AbbreviationName = member.GetCustomAttribute<AbbreviationNameAttribute>()?.Name,
                 IsRequired = member.GetCustomAttribute<IsRequiredAttribute>()?.IsRequired ?? false,
-                Description = member.GetCustomAttribute<DescriptionAttribute>()?.Description ?? string.Empty,
+                Descriptions = member.GetCustomAttributes<CommandParameterDescriptionAttribute>()
+                    ?.Select(attr => attr.Description)
+                    ?.ToArray() ?? new string[] { },
             };
         }
     }
@@ -112,6 +123,6 @@ namespace CommandParameterParse
         /// <summary>
         /// 描述
         /// </summary>
-        public string Description { get; set; }
+        public string[] Descriptions { get; set; }
     }
 }

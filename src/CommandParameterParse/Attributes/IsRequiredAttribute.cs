@@ -12,7 +12,7 @@ namespace CommandParameterParse.Attributes
         /// <summary>
         /// 注入: 别名
         /// </summary>
-        public IsRequiredAttribute(bool IsRequired)
+        public IsRequiredAttribute(bool IsRequired = true)
         {
             this.IsRequired = IsRequired;
         }
