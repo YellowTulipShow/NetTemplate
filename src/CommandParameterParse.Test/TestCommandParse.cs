@@ -36,27 +36,6 @@ namespace CommandParameterParse.Test
             public IDictionary<string, string> DataJSONPaths { get; set; }
         }
 
-        private class DictType : ITypeHandle<IDictionary<string, string>>
-        {
-            public Type Identification() => typeof(IDictionary<string, string>);
-            public IDictionary<string, string> To(string[] strs)
-            {
-                IDictionary<string, string> dict = new Dictionary<string, string>();
-                foreach (string str in strs)
-                {
-                    var match = Regex.Match(str, @"^([a-zA-Z]+)=([^\n\r]+)$");
-                    if (!match.Success)
-                        continue;
-                    string key = match.Groups[1].Value;
-                    string value = match.Groups[2].Value;
-                    if (!string.IsNullOrEmpty(key))
-                        dict[key] = value;
-                }
-                return dict;
-            }
-            object ITypeHandle.To(string[] strs) => To(strs);
-        }
-
         [TestMethod]
         public void TestToData()
         {
@@ -71,7 +50,7 @@ namespace CommandParameterParse.Test
                 @"table=data/users.json",
             };
             ICommandParse<TestArgsModel> commandParse = new CommandParse<TestArgsModel>(this);
-            commandParse.RegisterITypeHandle(new DictType());
+            commandParse.RegisterITypeHandle(new TypeHandles.TypeHandle_IDictionaryStringJoinString());
             commandParse.RegisterIParameterFormatHandle(new ParameterFormatHandles.KeyValueParameterFormatHandle());
             commandParse.OnExecute(args, m =>
             {

@@ -44,7 +44,7 @@ namespace CommandParameterParse
         /// </summary>
         protected virtual void InitDefaultConfigs()
         {
-            typeHandleLibrary.Register(new TypeHandles.StringHandle());
+            typeHandleLibrary.Register(new TypeHandles.TypeHandle_String());
             formatHandles.Add(new ParameterFormatHandles.AbbreviationParameterFormatHandle());
             formatHandles.Add(new ParameterFormatHandles.HorizontalLineParameterFormatHandle());
         }
@@ -78,7 +78,11 @@ namespace CommandParameterParse
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"错误: {ex.Message}");
+                helpPrint.Prints(new string[]
+                {
+                    "发生错误:",
+                    "\t" + ex.Message,
+                });
                 throw ex;
             }
         }

@@ -19,7 +19,7 @@ namespace CommandParameterParse
         public TypeHandleLibrary()
         {
             dictHandle = new Dictionary<string, ITypeHandle>();
-            Register(new StringHandle());
+            Register(new TypeHandle_String());
         }
 
         private string GetSign(Type type)

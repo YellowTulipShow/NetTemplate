@@ -7,6 +7,11 @@
 
   <ItemGroup>
     <PackageReference Include="Fluid.Core" Version="2.2.15" />
+    <PackageReference Include="YTS.Log" Version="0.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CommandParameterParse\CommandParameterParse.csproj" />
   </ItemGroup>
 
 </Project>

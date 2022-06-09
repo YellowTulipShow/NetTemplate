@@ -1,9 +1,9 @@
 ﻿namespace CommandParameterParse.TypeHandles
 {
     /// <summary>
-    /// String 类型处理
+    /// 数据类型处理: string
     /// </summary>
-    public class StringHandle : AbsTypeHandle<string>
+    public class TypeHandle_String : AbsTypeHandle<string>
     {
         /// <inheritdoc/>
         public override string To(string[] strs)

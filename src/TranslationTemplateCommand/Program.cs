@@ -1,31 +1,50 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 
-using Fluid;
+using CommandParameterParse;
+using CommandParameterParse.TypeHandles;
+using CommandParameterParse.ParameterFormatHandles;
+
+using YTS.Log;
 
 namespace TranslationTemplateCommand
 {
-    class Program
+    public class Program : ICommandParseHelpPrint
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-            for (int i = 0; i < args.Length; i++)
-            {
-                Console.WriteLine($"args[{i}]: ({args[i]})");
-            }
-            Console.WriteLine("Print Complate~~~");
+            Encoding encoding = Encoding.UTF8;
 
-            var parser = new FluidParser();
-            var model = new { Firstname = "Bill", Lastname = "Gates" };
-            var source = "Hello {{ Firstname }} {{ Lastname }}";
-            if (parser.TryParse(source, out var template, out var error))
+            var logFile = new FileInfo($"./logs/TestGitHelper/{DateTime.Now:yyyy_MM_dd}.log");
+            ILog log = new FilePrintLog(logFile.FullName, encoding)
+                .Connect(new ConsolePrintLog());
+            var logArgs = log.CreateArgDictionary();
+            logArgs["CommandInputArgs"] = args;
+
+            try
             {
-                var context = new TemplateContext(model);
-                Console.WriteLine(template.Render(context));
+                ICommandParseHelpPrint helpPrint = new Program();
+                ICommandParse<ConvertUtilsExecuteArgs> commandParse = new CommandParse<ConvertUtilsExecuteArgs>(helpPrint);
+                commandParse.RegisterITypeHandle(new TypeHandle_IDictionaryStringJoinString());
+                commandParse.RegisterIParameterFormatHandle(new KeyValueParameterFormatHandle());
+                commandParse.OnExecute(args, m =>
+                {
+                    var util = new ConvertUtils(log, encoding);
+                    util.OnExecut(m);
+                });
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Error: {error}");
+                log.Error("解释命令行参数出错!", ex, logArgs);
+            }
+        }
+
+        public void Prints(string[] help_content)
+        {
+            foreach (string line in help_content)
+            {
+                Console.WriteLine(line);
             }
         }
     }
