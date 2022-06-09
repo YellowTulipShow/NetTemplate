@@ -1,4 +1,4 @@
-﻿namespace CommandParameterParse.Attributes
+namespace CommandParameterParse.Attributes
 {
     /// <summary>
     /// 参数配置: 别名

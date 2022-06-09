@@ -1,6 +1,5 @@
 ﻿using System;
 
-using CommandParameterParse;
 using Fluid;
 
 namespace TranslationTemplateCommand

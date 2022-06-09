@@ -12,12 +12,12 @@ namespace CommandParameterParse.Test
         public void TestRender_AbbreviationParameterFormatHandle()
         {
             string[] args = new string[] {
-                @"-q=张三q",
-                @"-w='张三w'",
-                @"-e=""张三e""",
-                @"-r 张三r",
-                @"-t '张三t'",
-                @"-y ""张三y""",
+                @"-q=寮犱笁q",
+                @"-w='寮犱笁w'",
+                @"-e=""寮犱笁e""",
+                @"-r 寮犱笁r",
+                @"-t '寮犱笁t'",
+                @"-y ""寮犱笁y""",
             };
             IList<IParameterFormatHandle> formatHandles = new List<IParameterFormatHandle>
             {
@@ -39,7 +39,7 @@ namespace CommandParameterParse.Test
                 Assert.AreEqual(key, param.Name);
                 Assert.IsNotNull(param.Contents);
                 Assert.AreEqual(1, param.Contents.Length);
-                Assert.AreEqual($"张三{key}", param.Contents[0]);
+                Assert.AreEqual($"寮犱笁{key}", param.Contents[0]);
             }
         }
 
@@ -47,12 +47,12 @@ namespace CommandParameterParse.Test
         public void TestRender_HorizontalLineParameterFormatHandle()
         {
             string[] args = new string[] {
-                @"--qname=张三qname",
-                @"--wname='张三wname'",
-                @"--ename=""张三ename""",
-                @"--rname 张三rname",
-                @"--tname '张三tname'",
-                @"--yname ""张三yname""",
+                @"--qname=寮犱笁qname",
+                @"--wname='寮犱笁wname'",
+                @"--ename=""寮犱笁ename""",
+                @"--rname 寮犱笁rname",
+                @"--tname '寮犱笁tname'",
+                @"--yname ""寮犱笁yname""",
             };
             IList<IParameterFormatHandle> formatHandles = new List<IParameterFormatHandle>
             {
@@ -74,7 +74,7 @@ namespace CommandParameterParse.Test
                 Assert.AreEqual(key, param.Name);
                 Assert.IsNotNull(param.Contents);
                 Assert.AreEqual(1, param.Contents.Length);
-                Assert.AreEqual($"张三{key}", param.Contents[0]);
+                Assert.AreEqual($"寮犱笁{key}", param.Contents[0]);
             }
         }
 
@@ -118,19 +118,19 @@ namespace CommandParameterParse.Test
         public void TestRender_MergeTotal()
         {
             string[] args = new string[] {
-                @"-q=张三q",
-                @"-w='张三w'",
-                @"-e=""张三e""",
-                @"-r 张三r",
-                @"-t '张三t'",
-                @"-y ""张三y""",
+                @"-q=寮犱笁q",
+                @"-w='寮犱笁w'",
+                @"-e=""寮犱笁e""",
+                @"-r 寮犱笁r",
+                @"-t '寮犱笁t'",
+                @"-y ""寮犱笁y""",
 
-                @"--qname=张三qname",
-                @"--wname='张三wname'",
-                @"--ename=""张三ename""",
-                @"--rname 张三rname",
-                @"--tname '张三tname'",
-                @"--yname ""张三yname""",
+                @"--qname=寮犱笁qname",
+                @"--wname='寮犱笁wname'",
+                @"--ename=""寮犱笁ename""",
+                @"--rname 寮犱笁rname",
+                @"--tname '寮犱笁tname'",
+                @"--yname ""寮犱笁yname""",
 
                 @"--data",
                 @"database=""e:\db\admin.json""",
