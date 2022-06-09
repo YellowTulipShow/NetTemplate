@@ -6,7 +6,6 @@
         <Version>0.0.1</Version>
         <Authors>YellowTulipShow</Authors>
         <Description>基于开源软件: Fluid.Core 实现的转换模板命令</Description>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <PackAsTool>true</PackAsTool>

@@ -2,7 +2,10 @@ $ExecutePath = $PWD
 Set-Location $PSScriptRoot
 
 Write-Output "PSScriptRoot: $PSScriptRoot"
+
 # .\_release\win-x64\TranslationTemplateCommand\TranslationTemplateCommand.exe -r "D:\Work\YTS.ZRQ\NetTemplate" -t .\template\index.html -o .\_output\index.html --data db:./template/db.json table:.\template\table.json
+
+# dotnet tool install -g --add-source .\_release\packages\ TranslationTemplateCommand
 
 Set-Location $ExecutePath
 if ($PSScriptRoot -eq $ExecutePath) {
