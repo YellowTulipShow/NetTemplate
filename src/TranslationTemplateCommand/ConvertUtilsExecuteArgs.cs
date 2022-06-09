@@ -4,7 +4,7 @@ using CommandParameterParse.Attributes;
 
 namespace TranslationTemplateCommand
 {
-    [CommandParameterDescription("生成文件名称参数配置")]
+    [CommandParameterDescription("解释模板文件用于生成文件")]
     public struct ConvertUtilsExecuteArgs
     {
         [AbbreviationName('r')]

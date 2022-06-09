@@ -81,7 +81,7 @@ namespace CommandParameterParse
                 helpPrint.Prints(new string[]
                 {
                     "发生错误:",
-                    "\t" + ex.Message,
+                    $"{tab}{ex.Message}",
                 });
                 throw ex;
             }
@@ -92,6 +92,7 @@ namespace CommandParameterParse
             return parameters.Any(b => b.Name == "h" || b.Name == "help");
         }
 
+        private const string tab = "    ";
         /// <summary>
         /// 打印帮助文档内容
         /// </summary>
@@ -103,7 +104,7 @@ namespace CommandParameterParse
             {
                 lines.Add($"命令描述:");
                 foreach (string desc in structCompile.Descriptions)
-                    lines.Add($"\t{desc}");
+                    lines.Add($"{tab}{desc}");
                 lines.Add(string.Empty);
             }
 
@@ -113,16 +114,16 @@ namespace CommandParameterParse
                 string names = string.Join(", ", new string[] {
                     option.AbbreviationName, option.AliasName, option.FullName
                 }.Where(b => !string.IsNullOrEmpty(b)).ToArray());
-                lines.Add($"\t名称: {names}");
+                lines.Add($"{tab}名称: {names}");
                 if (option.IsRequired)
                 {
-                    lines.Add($"\t[必填项]");
+                    lines.Add($"{tab}[必填项]");
                 }
                 if ((option.Descriptions?.Length ?? 0) > 0)
                 {
-                    lines.Add($"\t命令描述:");
+                    lines.Add($"{tab}命令描述:");
                     foreach (string desc in option.Descriptions)
-                        lines.Add($"\t\t{desc}");
+                        lines.Add($"{tab}{tab}{desc}");
                 }
                 lines.Add(string.Empty);
             }
@@ -132,7 +133,7 @@ namespace CommandParameterParse
             {
                 foreach (var line in formatHandle.HelpFormatPrint())
                 {
-                    lines.Add($"\t{line}");
+                    lines.Add($"{tab}{line}");
                 }
                 lines.Add(string.Empty);
             }
