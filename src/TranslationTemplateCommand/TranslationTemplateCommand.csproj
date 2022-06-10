@@ -12,6 +12,17 @@
         <ToolCommandName>ctemp</ToolCommandName>
     </PropertyGroup>
 
+  <ItemGroup>
+	  <None Update="ChangeLog.md">
+		  <PackagePath>\</PackagePath>
+		  <Pack>True</Pack>
+	  </None>
+	  <None Update="README.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+	  </None>
+  </ItemGroup>
+
     <ItemGroup>
         <PackageReference Include="Fluid.Core" Version="2.2.15" />
         <PackageReference Include="YTS.Log" Version="0.1.2" />
