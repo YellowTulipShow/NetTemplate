@@ -1,6 +1,6 @@
 $ExecutePath = $PWD
 Set-Location $PSScriptRoot
-Set-Location ..
+# Set-Location ..
 
 function PrintLineSplit([string]$path)
 {
@@ -11,10 +11,10 @@ function PrintLineSplit([string]$path)
 
 PrintLineSplit
 
-$template_path = "./_test/template/index.html"
-$output_path = "./_test/output/index.html"
-$db_json_path = "./_test/data/db.json"
-$table_json_path = "./_test/data/table.json"
+$template_path = "./template/index.html"
+$output_path = "./output/index.html"
+$db_json_path = "./data/db.json"
+$table_json_path = "./data/table.json"
 
 Write-Host "ctemp -r $PWD -t $template_path -o $output_path --data db:$db_json_path table:$table_json_path"
 ctemp -r $PWD -t $template_path -o $output_path --data db:$db_json_path table:$table_json_path

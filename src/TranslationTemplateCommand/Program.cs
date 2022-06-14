@@ -1,50 +1,31 @@
 ﻿using System;
-using System.IO;
 using System.Text;
-
-using CommandParameterParse;
-using CommandParameterParse.TypeHandles;
-using CommandParameterParse.ParameterFormatHandles;
 
 using YTS.Log;
 
 namespace TranslationTemplateCommand
 {
-    public class Program : ICommandParseHelpPrint
+    public class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             Encoding encoding = Encoding.UTF8;
 
-            var logFile = ILogExtend.GetLogFilePath("TranslationTemplateCommand");
-            ILog log = new FilePrintLog(logFile, encoding)
-                .Connect(new ConsolePrintLog());
+            var logFile = ILogExtend.GetLogFilePath("Program");
+            ILog log = new FilePrintLog(logFile, encoding).Connect(new ConsolePrintLog());
             var logArgs = log.CreateArgDictionary();
             logArgs["CommandInputArgs"] = args;
 
             try
             {
-                ICommandParseHelpPrint helpPrint = new Program();
-                ICommandParse<ConvertUtilsExecuteArgs> commandParse = new CommandParse<ConvertUtilsExecuteArgs>(helpPrint);
-                commandParse.RegisterITypeHandle(new TypeHandle_IDictionaryStringJoinString());
-                commandParse.RegisterIParameterFormatHandle(new KeyValueParameterFormatHandle());
-                commandParse.OnExecute(args, m =>
-                {
-                    var util = new ConvertUtils(log, encoding);
-                    util.OnExecut(m);
-                });
+                MainHelpr mainHelpr = new MainHelpr(log);
+                CommandArgsParser commandArgsParser = new CommandArgsParser(log, mainHelpr);
+                return commandArgsParser.OnParser(args);
             }
             catch (Exception ex)
             {
-                log.Error("解释命令行参数出错!", ex, logArgs);
-            }
-        }
-
-        public void Prints(string[] help_content)
-        {
-            foreach (string line in help_content)
-            {
-                Console.WriteLine(line);
+                log.Error("执行程序出错!", ex, logArgs);
+                return 1;
             }
         }
     }

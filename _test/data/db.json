@@ -1,5 +1,5 @@
 {
-    "Name": "dt_Users",
-    "Desc": "用户表的描述叙述",
-    "TableCount": 3
+    "Name": "MallDb",
+    "Explain": "商城",
+    "Prefix": "Mall"
 }

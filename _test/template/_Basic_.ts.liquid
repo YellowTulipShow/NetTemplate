@@ -1,0 +1,179 @@
+﻿namespace {{ db.Name }}Manage {
+    export class {{ table.Name }} {
+        public Permission_Add: boolean = false;
+        public Permission_Edit: boolean = false;
+        constructor() {
+            let self = this;
+            $(async () => {
+                await CheckPageControlPermission([{
+                    permissionName: '{{ db.Prefix }}_{{ table.Explain }}添加',
+                    controlJQuery: '.operating_Add',
+                    callBack: (is: boolean) => { self.Permission_Add = is; }
+                }, {
+                    permissionName: '{{ db.Prefix }}_{{ table.Explain }}修改',
+                    controlJQuery: '.operating_Edit',
+                    callBack: (is: boolean) => { self.Permission_Edit = is; }
+                }, {
+                    permissionName: '{{ db.Prefix }}_{{ table.Explain }}删除',
+                    controlJQuery: '.operating_Delete'
+                }] as PageControlPermission[]);
+            });
+        }
+
+        public GetSearchData(search_form_name: string) {
+            UrlArgShineUponFormContents(search_form_name);
+            let json = $(search_form_name).serializeJSON();
+            return json;
+        }
+
+        public Search(datagrid_name: string, search_form_name: string) {
+            let self = this;
+            let json = self.GetSearchData(search_form_name);
+            $(datagrid_name).datagrid('load', json);
+            return false;
+        }
+
+        private readonly Edit_HTMLPage_AddressURL = "{{ table.Name }}Edit.html";
+        private readonly Edit_HTMLPage_Style = {
+            'width': '850px',
+            // 'height': '80%',
+            'padding': '10px 20px 0',
+        };
+        public Create(datagrid_name: string) {
+            let self = this;
+            let model = {};
+            let conf: Page.EasyUI.Extend.MConfig_BaiscEditSaveDialog = {
+                title: "添加{{ table.Explain }}",
+                url: self.Edit_HTMLPage_AddressURL,
+                style: self.Edit_HTMLPage_Style,
+                loadFunc: (dialog: Page.EasyUI.Extend.Dialog) => {
+                    let form = dialog.GetDialog().find('form');
+                    form.form('load', model);
+                },
+                isSave: self.Permission_Add,
+                saveFunc: (dialog: Page.EasyUI.Extend.Dialog) => {
+                    self.Save(dialog);
+                },
+                closeFunc: (dialog: Page.EasyUI.Extend.Dialog) => {
+                    $(datagrid_name).datagrid('load');
+                },
+            };
+            Page.EasyUI.Extend.Dialog.ToGenerate_BaiscEditSaveDialog(conf).Create().Open();
+        }
+        public async Edit(datagrid_name: string) {
+            let self = this;
+            let row = $(datagrid_name).datagrid('getSelected');
+            if (!row) {
+                $.messager.alert("提示", "未选择数据！", "info");
+                return;
+            }
+            let model = formatPrintModelContent(row);
+            let conf: Page.EasyUI.Extend.MConfig_BaiscEditSaveDialog = {
+                title: "编辑{{ table.Explain }}",
+                url: self.Edit_HTMLPage_AddressURL,
+                style: self.Edit_HTMLPage_Style,
+                loadFunc: (dialog: Page.EasyUI.Extend.Dialog) => {
+                    let form = dialog.GetDialog().find('form');
+                    form.form('load', model);
+                },
+                isSave: self.Permission_Edit,
+                saveFunc: (dialog: Page.EasyUI.Extend.Dialog) => {
+                    self.Save(dialog);
+                },
+                closeFunc: (dialog: Page.EasyUI.Extend.Dialog) => {
+                    $(datagrid_name).datagrid('reload');
+                },
+            };
+            Page.EasyUI.Extend.Dialog.ToGenerate_BaiscEditSaveDialog(conf).Create().Open();
+        }
+        private EditLock_Save: boolean = false;
+        private async Save(dialog: Page.EasyUI.Extend.Dialog) {
+            let self = this;
+            let form = dialog.GetDialog().find('form');
+            form.form('submit', {
+                onSubmit: function () {
+                    $(this).form('enableValidation');
+                    return false;
+                }
+            });
+            if (!form.form('validate')) {
+                return;
+            }
+            let model = form.serializeJSON();
+            model = formatPrintModelContent(model);
+            if (self.EditLock_Save) {
+                console.info('正在保存编辑内容, 锁定中...');
+                return;
+            }
+            $.messager.progress({
+                noheader: true,
+                title: false,
+                msg: '正在保存中...',
+                interval: 100,
+            });
+            self.EditLock_Save = true;
+            let result = await Call(AdminWebApi.{{ table.Name }}.Edit{{ table.Name }}.UrlData({}), model);
+            self.EditLock_Save = false;
+            $.messager.progress('close');
+            if (result.Error) {
+                $.messager.alert({
+                    title: '提示',
+                    msg: GetMessage(result),
+                    icon: 'error'
+                });
+                return;
+            }
+            $.messager.alert({
+                title: '提示',
+                msg: GetMessage(result),
+                icon: 'success'
+            });
+            dialog.Close();
+        }
+
+        public async Remove(datagrid_name: string) {
+            let rows = $(datagrid_name).datagrid('getSelections');
+            if (!rows.length) {
+                $.messager.alert({
+                    title: '提示',
+                    msg: '请选择要删除的项。',
+                    icon: 'info'
+                });
+                return;
+            }
+            if (!await new Promise((resolve, reject) => $.messager.confirm('提示', '确认删除选中的项？', r => resolve(r)))) {
+                return;
+            }
+
+            let ids = Enumerable.from<any>(rows).select(r => r.Id).toArray();
+
+            $.messager.progress({
+                noheader: true,
+                title: false,
+                msg: '正在删除中...',
+                interval: 100
+            });
+            let result = await Call(AdminWebApi.{{ table.Name }}.Delete{{ table.Name }}s, ids);
+            $.messager.progress('close');
+
+            if (result.Error) {
+                $.messager.alert({
+                    title: '提示',
+                    msg: GetMessage(result),
+                    icon: 'error'
+                });
+                return;
+            }
+            $(datagrid_name).data('SelectIndex', $(datagrid_name).datagrid('getRowIndex', rows[0]));
+            $(datagrid_name).data('onLoadSuccessAfter', function () {
+                $(datagrid_name).datagrid("clearSelections");
+            });
+            $(datagrid_name).datagrid('reload');
+            $.messager.alert({
+                title: '提示',
+                msg: GetMessage(result),
+                icon: 'success'
+            });
+        }
+    }
+}

@@ -1,0 +1,106 @@
+﻿{
+  "Name": "AcNProductBanner",
+  "Explain": "儿推新品活动页Banner表",
+  "Fields": {
+    "Id": {
+      "Name": "Id",
+      "Explain": "",
+      "Type": "int",
+      "PrimaryKey": true,
+      "IdentitySign": true,
+      "ViceType": "IDPrimaryKey",
+      "NullAbleChar": "",
+      "NamePrefix": ""
+    },
+    "BannerName": {
+      "Name": "BannerName",
+      "Explain": "Banner名称",
+      "Type": "string",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "",
+      "NullAbleChar": "",
+      "NamePrefix": ""
+    },
+    "BannerImgUrl": {
+      "Name": "BannerImgUrl",
+      "Explain": "图片地址",
+      "Type": "string",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "image",
+      "NullAbleChar": "",
+      "NamePrefix": ""
+    },
+    "HrefUrl": {
+      "Name": "HrefUrl",
+      "Explain": "跳转地址",
+      "Type": "string",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "",
+      "NullAbleChar": "",
+      "NamePrefix": ""
+    },
+    "Ordinal": {
+      "Name": "Ordinal",
+      "Explain": "图片排序",
+      "Type": "int",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "number",
+      "NullAbleChar": "?",
+      "NamePrefix": ""
+    },
+    "AddTime": {
+      "Name": "AddTime",
+      "Explain": "添加时间",
+      "Type": "DateTime",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "",
+      "NullAbleChar": "?",
+      "NamePrefix": ""
+    },
+    "AddUserID": {
+      "Name": "AddUserID",
+      "Explain": "添加者",
+      "Type": "long",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "ID",
+      "NullAbleChar": "?",
+      "NamePrefix": "AddUser"
+    },
+    "UpdateTime": {
+      "Name": "UpdateTime",
+      "Explain": "更新时间",
+      "Type": "DateTime",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "",
+      "NullAbleChar": "?",
+      "NamePrefix": ""
+    },
+    "UpdateUserID": {
+      "Name": "UpdateUserID",
+      "Explain": "更新人",
+      "Type": "long",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "ID",
+      "NullAbleChar": "?",
+      "NamePrefix": "UpdateUser"
+    },
+    "ActivityPageType": {
+      "Name": "ActivityPageType",
+      "Explain": "活动页类型（维护到字典表）  1.儿推新品活动页 2.儿推好物榜活动页",
+      "Type": "int",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "Dictionaries",
+      "NullAbleChar": "?",
+      "NamePrefix": ""
+    }
+  }
+}

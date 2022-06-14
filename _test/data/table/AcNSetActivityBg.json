@@ -1,0 +1,96 @@
+﻿{
+  "Name": "AcNSetActivityBg",
+  "Explain": "商城活动页背景图片设置表",
+  "Fields": {
+    "Id": {
+      "Name": "Id",
+      "Explain": "",
+      "Type": "int",
+      "PrimaryKey": true,
+      "IdentitySign": true,
+      "ViceType": "IDPrimaryKey",
+      "NullAbleChar": "",
+      "NamePrefix": ""
+    },
+    "ActivityName": {
+      "Name": "ActivityName",
+      "Explain": "活动页名称",
+      "Type": "string",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "",
+      "NullAbleChar": "",
+      "NamePrefix": ""
+    },
+    "TypeID": {
+      "Name": "TypeID",
+      "Explain": "背景属性  1.页面背景  2.按钮背景 3.文字背景 4.整体背景",
+      "Type": "int",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "ID",
+      "NullAbleChar": "?",
+      "NamePrefix": "Type"
+    },
+    "PagePosition": {
+      "Name": "PagePosition",
+      "Explain": "背景在活动页中的位置  1.头部 2.中上部 3.中部 4.中下部 5.下部 6.底部",
+      "Type": "int",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "Dictionaries",
+      "NullAbleChar": "?",
+      "NamePrefix": ""
+    },
+    "BgWidth": {
+      "Name": "BgWidth",
+      "Explain": "",
+      "Type": "int",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "Dictionaries",
+      "NullAbleChar": "?",
+      "NamePrefix": ""
+    },
+    "BgHeight": {
+      "Name": "BgHeight",
+      "Explain": "",
+      "Type": "int",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "Dictionaries",
+      "NullAbleChar": "?",
+      "NamePrefix": ""
+    },
+    "BgImgUrl": {
+      "Name": "BgImgUrl",
+      "Explain": "背景图片地址",
+      "Type": "string",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "image",
+      "NullAbleChar": "",
+      "NamePrefix": ""
+    },
+    "AddTime": {
+      "Name": "AddTime",
+      "Explain": "添加时间",
+      "Type": "DateTime",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "",
+      "NullAbleChar": "?",
+      "NamePrefix": ""
+    },
+    "AddUserID": {
+      "Name": "AddUserID",
+      "Explain": "添加者",
+      "Type": "long",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "ID",
+      "NullAbleChar": "?",
+      "NamePrefix": "AddUser"
+    }
+  }
+}

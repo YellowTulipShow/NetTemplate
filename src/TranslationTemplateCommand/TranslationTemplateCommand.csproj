@@ -3,7 +3,7 @@
     <PropertyGroup>
         <Title>转换解析模板命令</Title>
         <PackageId>TranslationTemplateCommand</PackageId>
-        <Version>0.0.1</Version>
+        <Version>0.0.2</Version>
         <Authors>YellowTulipShow</Authors>
         <Description>基于开源软件: Fluid.Core 实现的转换模板命令</Description>
         <OutputType>Exe</OutputType>
@@ -24,6 +24,7 @@
   </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
         <PackageReference Include="Fluid.Core" Version="2.2.15" />
         <PackageReference Include="YTS.Log" Version="0.1.2" />
     </ItemGroup>

@@ -1,0 +1,76 @@
+﻿{
+  "Name": "AcGoodProductType",
+  "Explain": "好物榜活动产品分类表",
+  "Fields": {
+    "Id": {
+      "Name": "Id",
+      "Explain": "",
+      "Type": "int",
+      "PrimaryKey": true,
+      "IdentitySign": true,
+      "ViceType": "IDPrimaryKey",
+      "NullAbleChar": "",
+      "NamePrefix": ""
+    },
+    "ParentID": {
+      "Name": "ParentID",
+      "Explain": "父级Id",
+      "Type": "int",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "ID",
+      "NullAbleChar": "?",
+      "NamePrefix": "Parent"
+    },
+    "TypeName": {
+      "Name": "TypeName",
+      "Explain": "类型名称",
+      "Type": "string",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "",
+      "NullAbleChar": "",
+      "NamePrefix": ""
+    },
+    "TypeImgUrl": {
+      "Name": "TypeImgUrl",
+      "Explain": "类型图片",
+      "Type": "string",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "image",
+      "NullAbleChar": "",
+      "NamePrefix": ""
+    },
+    "AcGoodStockShelfProductIds": {
+      "Name": "AcGoodStockShelfProductIds",
+      "Explain": "该级类型关联的上架产品Id",
+      "Type": "string",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "IDStrings",
+      "NullAbleChar": "",
+      "NamePrefix": "AcGoodStockShelfProduct"
+    },
+    "Ordinal": {
+      "Name": "Ordinal",
+      "Explain": "顺序",
+      "Type": "int",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "number",
+      "NullAbleChar": "?",
+      "NamePrefix": ""
+    },
+    "IsShow": {
+      "Name": "IsShow",
+      "Explain": "该类型是否显示",
+      "Type": "bool",
+      "PrimaryKey": false,
+      "IdentitySign": false,
+      "ViceType": "",
+      "NullAbleChar": "?",
+      "NamePrefix": ""
+    }
+  }
+}

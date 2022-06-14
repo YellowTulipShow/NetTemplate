@@ -1,0 +1,214 @@
+{%- assign db_NotDbName = db.Name | replace: "Db", "" -%}
+
+{% comment %} 常规查询值名称集合 {% endcomment %}
+{%- assign QueryListWhereParameterNames = "" -%}
+{% comment %} 字典值集合 {% endcomment %}
+{%- assign DictionariesNames = "" -%}
+
+{%- for key in table.Fields -%}
+{%- assign field = table.Fields[key] -%}
+    {%- if field.PrimaryKey == 'True'
+        or field.IdentitySign == 'True'
+        or field.ViceType == 'image'
+        or field.Name == 'AddUserID'
+        or field.Name == 'UpdateUserID'
+        or field.Name == 'DeleteUserID'
+        or field.Name == 'Ordinal' %}
+        {%- continue  -%}
+    {%- elsif field.ViceType=="Dictionaries" -%}
+        {%- assign QueryListWhereParameterNames = QueryListWhereParameterNames | append: "," | append: key -%}
+        {%- assign DictionariesNames = DictionariesNames | append: "," | append: key -%}
+    {%- else -%}
+        {%- assign QueryListWhereParameterNames = QueryListWhereParameterNames | append: "," | append: key -%}
+    {%- endif -%}
+{% endfor %}
+{%- assign QueryListWhereParameterNames = QueryListWhereParameterNames | split: ',' | compact -%}
+{%- assign DictionariesNames = DictionariesNames | split: ',' | compact -%}
+
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
+using System.Linq;
+using System.Linq.Dynamic;
+using System.Web.Http;
+
+using ErTuiShengShi.Data;
+using ErTuiShengShi.Logic.Models;
+using ErTuiShengShi.Logic.{{ db_NotDbName }};
+using ErTuiShengShi.Logic.{{ db_NotDbName }}.QueryWhere;
+
+namespace ErTuiShengShi.AdminWebApi.Controllers.{{ db.Name }}Manage
+{
+    /// <summary>
+    /// {{ table.Explain }}
+    /// </summary>
+    public class {{ table.Name }}Controller : ApiController
+    {
+        private ErTuiShengShiEntities dber => Api.DbErTuiShengShi;
+        private {{ db.Name }}Entities db => Api.Db{{ db_NotDbName }};
+
+        private readonly ILog log;
+        public {{ table.Name }}Controller()
+        {
+            log = new LogicGeneralLog();
+        }
+
+        [HttpGet]
+        public object Get{{ table.Name }}List(int? page, int? rows, string sort, string order,
+            {%- for key in QueryListWhereParameterNames -%}
+            {%- assign field = table.Fields[key] -%}
+            {{"\n            "}}
+            {%- if field.ViceType == 'number' -%}
+            int? {{ field.Name }}Where = null,
+            {{ field.Type }}{{ field.NullAbleChar }} {{ field.Name }} = null
+            {%- elsif field.Type == 'DateTime' -%}
+            {{ field.Type }}{{ field.NullAbleChar }} {{ field.Name }}Start = null,
+            {{field.Type}}{{ field.NullAbleChar }} {{ field.Name }}End = null
+            {%- else -%}
+            {{field.Type}}{{ field.NullAbleChar }} {{ field.Name }} = null
+            {%- endif -%}
+            {%- unless forloop.last -%},{%- else -%}){%- endunless -%}
+            {% endfor %}
+        {
+            IQueryable<{{ table.Name }}> list = db.{{ table.Name }}.AsQueryable();
+            list = list.QueryWhereBasic(
+                {%- for key in QueryListWhereParameterNames -%}
+                {%- assign field = table.Fields[key] -%}
+                {{"\n                "}}
+                {%- if field.ViceType == 'number' -%}
+                {{ field.Name }}Where: {{ field.Name }}Where,
+                {{ field.Name }}: {{ field.Name }}
+                {%- elsif field.Type == 'DateTime' -%}
+                {{ field.Name }}Start: {{ field.Name }}Start,
+                {{ field.Name }}End: {{ field.Name }}End
+                {%- else -%}
+                {{ field.Name }}: {{ field.Name }}
+                {%- endif -%}
+                {%- unless forloop.last -%},{%- else -%});{%- endunless -%}
+                {% endfor %}
+
+            {%- for key in DictionariesNames -%}
+            {%- assign field = table.Fields[key] -%}
+            {{"\n            "}}
+            var dict_{{ field.Name }} = db.{{ db.Prefix }}_SystemSetType
+                .QueryRemark(E{{ db.Prefix }}_SystemSetType.{{ field.Name }})
+                .ToDictionaryConfigurations()
+                .ToDictionary(b => b.Value);
+            {%- endfor %}
+
+            int total = 0;
+            var result = list
+                .OrderBy(string.IsNullOrEmpty(sort) ? "Id" : sort + (string.IsNullOrEmpty(order) ? "" : (" " + order)))
+                .ToPager(page ?? 1, rows ?? 10, c => total = c)
+                .ToList()
+                .Select(m => new
+                {
+                    {%- for key in table.Fields -%}
+                    {%- assign field = table.Fields[key] -%}
+                    {{"\n                    "}}
+                    {%- if field.ViceType == "ID" -%}
+                    m.{{ field.Name }},
+                    {{ field.NamePrefix }}Name = db.{{ db.Prefix }}_{{ field.NamePrefix }}
+                        .Where(b => b.Id == m.{{ field.Name }})
+                        .Select(b => b.{{ field.NamePrefix }}Name)
+                        .FirstOrDefault(),
+                    {%- elsif field.ViceType == "IDStrings" -%}
+                    m.{{ field.Name }},
+                    {{ field.NamePrefix }}Names = m.{{ field.Name }}.ToFieldsExplain(ids => db.{{ db.Prefix }}_{{ field.NamePrefix }}
+                        .Where(b => ids.Contains(b.Id.ToString()))
+                        .Select(b => b.{{ field.NamePrefix }}Name)
+                        .ToList()),
+                    {%- elsif field.ViceType == "Dictionaries" -%}
+                    m.{{ field.Name }},
+                    {{ field.Name }}Name = dict_{{ field.Name }}.GetValue((m.{{ field.Name }} ?? -1).ToString())?.Key,
+                    {%- elsif field.Type == "DateTime" -%}
+                    {{ field.Name }} = m.{{ field.Name }}.ToDateTimeString(),
+                    {%- else -%}
+                    m.{{ field.Name }},
+                    {%- endif -%}
+                    {% endfor %}
+                })
+                .ToList();
+
+            return new
+            {
+                rows = result,
+                total,
+            };
+        }
+
+        [HttpPost]
+        public Result<int> Edit{{ table.Name }}({{ table.Name }} model)
+        {
+            Result<int> result = new Result<int>();
+            int id = model.Id;
+
+            #region EditCheckNullField
+            {%- for key in table.Fields -%}
+            {%- assign field = table.Fields[key] -%}
+            {%- if field.PrimaryKey=='True' or field.IdentitySign=='True' %}
+            {%- continue  -%}
+            {%- endif -%}
+            {{"\n            "}}
+            {%- if field.Type == 'string' -%}
+            if (string.IsNullOrEmpty(model.{{ field.Name }}) || string.IsNullOrWhiteSpace(model.{{ field.Name }}))
+            {
+                result.ErrorCode = 1;
+                result.Message = "{{ field.Explain }}不能为空!";
+                return result;
+            }
+            {%- else -%}
+            if (model.{{ field.Name }} == null)
+            {
+                result.ErrorCode = 1;
+                result.Message = "{{ field.Explain }}不能为空!";
+                return result;
+            }
+            {%- endif -%}
+            {% endfor %}
+            #endregion
+
+            if (id == 0)
+            {
+                model.AddTime = DateTime.Now;
+                model.AddUserID = Api.User.Id;
+                db.{{ table.Name }}.Add(model);
+            }
+            else
+            {
+                db.{{ table.Name }}.Attach(model);
+                var entry = db.Entry(model);
+                entry.State = EntityState.Modified;
+                entry.Property(gp => gp.AddTime).IsModified = false;
+                entry.Property(gp => gp.AddUserID).IsModified = false;
+            }
+            db.SaveChanges();
+
+            result.ErrorCode = 0;
+            result.Data = model.Id;
+            result.Message = (id == 0 ? "添加" : "修改") + "成功！";
+            return result;
+        }
+
+        [HttpPost]
+        public Result Delete{{ table.Name }}s(long[] ids)
+        {
+            var result = new Result();
+            if (ids == null)
+            {
+                result.ErrorCode = 1;
+                result.Message = "删除失败, Ids为空。";
+                return result;
+            }
+
+			db.{{ table.Name }}.RemoveRange(db.{{ table.Name }}.Where(a => ids.Contains(a.Id)));
+
+            db.SaveChanges();
+
+            result.ErrorCode = 0;
+            result.Message = "删除成功！";
+            return result;
+        }
+    }
+}
