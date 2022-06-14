@@ -15,11 +15,34 @@ namespace TranslationTemplateCommand
     {
         private readonly ILog log;
         private readonly Encoding encoding;
+        private readonly FluidParser parser;
+        private readonly IDictionary<string, IFluidTemplate> cache_FluidTemplate;
 
         public ConvertUtils(ILog log, Encoding encoding)
         {
             this.log = log;
             this.encoding = encoding;
+            parser = new FluidParser();
+            cache_FluidTemplate = new Dictionary<string, IFluidTemplate>();
+        }
+
+        private IFluidTemplate ToFluidTemplate(FileInfo templateFile)
+        {
+            if (cache_FluidTemplate.ContainsKey(templateFile.FullName))
+            {
+                return cache_FluidTemplate[templateFile.FullName];
+            }
+            var logArgs = log.CreateArgDictionary();
+            logArgs["templateFile.FullName"] = templateFile.FullName;
+            string template_content = File.ReadAllText(templateFile.FullName, encoding);
+            if (!parser.TryParse(template_content, out IFluidTemplate template, out string error))
+            {
+                logArgs["FluidParser.ErrorMessage"] = error;
+                log.Error("调用: FluidParser 解释模板与数据失败", logArgs);
+                return null;
+            }
+            cache_FluidTemplate[templateFile.FullName] = template;
+            return template;
         }
 
         public void OnExecut(ConvertUtilsExecuteArgs m)
@@ -35,23 +58,14 @@ namespace TranslationTemplateCommand
                     log.Error("模板文件查找失败!", logArgs);
                     return;
                 }
+                IFluidTemplate fluidTemplate = ToFluidTemplate(template_file);
+
 
                 string template_content = File.ReadAllText(template_file.FullName, encoding);
                 logArgs["Output"] = m.Output;
                 FileInfo traget_file = ToFile(m.Output, m.Root);
 
                 logArgs["DataFilePaths"] = m.Data;
-                IDictionary<string, dynamic> modelconfigs = new Dictionary<string, dynamic>();
-                foreach (string key in m.Data.Keys)
-                {
-                    string value_path = m.Data[key];
-                    FileInfo value_file = ToFile(value_path, m.Root);
-                    string value_content = File.ReadAllText(value_file.FullName, encoding);
-                    modelconfigs[key] = JsonConvert.DeserializeObject<dynamic>(value_content);
-                }
-                string model_json = JsonConvert.SerializeObject(modelconfigs);
-                dynamic model = JsonConvert.DeserializeObject<dynamic>(model_json);
-                logArgs["IsGetData"] = true;
 
                 var parser = new FluidParser();
                 if (!parser.TryParse(template_content, out IFluidTemplate template, out string error))

@@ -29,10 +29,10 @@ namespace TranslationTemplateCommand
             rootC.AddGlobalOption(rootDireOption);
             rootC.AddGlobalOption(datasOption);
 
-            Command singleC = GetCommand_Single(rootDireOption, datasOption);
+            Command singleC = GetCommand_Single(rootDireOption);
             rootC.AddCommand(singleC);
-            Command listC = GetCommand_List(rootDireOption, datasOption);
-            rootC.AddCommand(listC);
+            Command batchC = GetCommand_Batch(rootDireOption);
+            rootC.AddCommand(batchC);
 
             return rootC.Invoke(args);
         }
@@ -58,6 +58,32 @@ namespace TranslationTemplateCommand
                     }
                     return new DirectoryInfo(direPath);
                 });
+        }
+
+        private Command GetCommand_Single(Option<DirectoryInfo> rootDireOption)
+        {
+            var datasOption = GetOption_Datas();
+            var templateOption = GetOption_Template();
+            var outputOption = GetOption_Output();
+
+            Command c = new Command("single", "单模板生成输出");
+            c.AddOption(datasOption);
+            c.AddOption(outputOption);
+            c.AddOption(outputOption);
+
+            c.SetHandler((context) =>
+            {
+                var rootDire = context.ParseResult.GetValueForOption(rootDireOption);
+                var datas = context.ParseResult.GetValueForOption(datasOption);
+                var template = context.ParseResult.GetValueForOption(templateOption);
+                var output = context.ParseResult.GetValueForOption(outputOption);
+                mainHelpr.OnExecute(rootDire, datas, new TemplateOutputConfig()
+                {
+                    Template = template,
+                    Output = output,
+                });
+            });
+            return c;
         }
         private Option<IDictionary<string, string>> GetOption_Datas()
         {
@@ -91,10 +117,9 @@ namespace TranslationTemplateCommand
                     return dict;
                 });
         }
-
-        private Command GetCommand_Single(Option<DirectoryInfo> rootDireOption, Option<IDictionary<string, string>> datasOption)
+        private Option<string> GetOption_Template()
         {
-            var templateOption = new Option<string>(
+            return new Option<string>(
                 aliases: new string[] { "-t", "--template" },
                 description: "模板文件定义, 扩展名: .liquid",
                 isDefault: true,
@@ -119,8 +144,10 @@ namespace TranslationTemplateCommand
                     }
                     return path;
                 });
-
-            var outputOption = new Option<string>(
+        }
+        private Option<string> GetOption_Output()
+        {
+            return new Option<string>(
                 aliases: new string[] { "-o", "--output" },
                 description: "输出文件路径定义",
                 isDefault: true,
@@ -139,29 +166,13 @@ namespace TranslationTemplateCommand
                     }
                     return path;
                 });
-
-            Command c = new Command("single", "单模板生成输出");
-            c.AddOption(templateOption);
-            c.AddOption(outputOption);
-            c.SetHandler((context) =>
-            {
-                var rootDire = context.ParseResult.GetValueForOption(rootDireOption);
-                var datas = context.ParseResult.GetValueForOption(datasOption);
-                var template = context.ParseResult.GetValueForOption(templateOption);
-                var output = context.ParseResult.GetValueForOption(outputOption);
-                mainHelpr.OnExecute(rootDire, datas, new TemplateOutputConfig()
-                {
-                    Template = template,
-                    Output = output,
-                });
-            });
-            return c;
         }
-        private Command GetCommand_List(Option<DirectoryInfo> rootDireOption, Option<IDictionary<string, string>> datasOption)
+
+        private Command GetCommand_Batch(Option<DirectoryInfo> rootDireOption)
         {
             var listFileOption = new Option<string>(
-                aliases: new string[] { "-f", "--file" },
-                description: "多个模板与输出路径定义配置文件, 扩展名: .txt 每行格式: <template> | <output>",
+                aliases: new string[] { "-c", "--config" },
+                description: "批量生成配置文件路径定义, 扩展名: .txt 每行格式: <template>.liquid | <output> | <key>:<path>.json <key>:<path>.json ...",
                 isDefault: true,
                 parseArgument: result =>
                 {
@@ -185,14 +196,13 @@ namespace TranslationTemplateCommand
                     return path;
                 });
 
-            Command c = new Command("single", "单模板生成输出");
+            Command c = new Command("batch", "配置文件批量生成输出");
             c.AddOption(listFileOption);
             c.SetHandler((context) =>
             {
                 var rootDire = context.ParseResult.GetValueForOption(rootDireOption);
-                var datas = context.ParseResult.GetValueForOption(datasOption);
                 var filePath = context.ParseResult.GetValueForOption(listFileOption);
-                mainHelpr.OnExecute(rootDire, datas, filePath);
+                mainHelpr.OnExecute(rootDire, filePath);
             });
             return c;
         }
