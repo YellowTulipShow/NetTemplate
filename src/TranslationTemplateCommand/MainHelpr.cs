@@ -45,15 +45,29 @@ namespace TranslationTemplateCommand
             return template;
         }
 
-        private IDictionary<string, dynamic> ToModelDatas(IDictionary<string, string> datas, DirectoryInfo rootDire)
+        private IDictionary<string, dynamic> ToModelDatas(string[] datas, DirectoryInfo rootDire)
         {
             var logArgs = log.CreateArgDictionary();
+            logArgs["datas"] = datas;
             logArgs["rootDire.FullName"] = rootDire.FullName;
+
+            Regex dataLineRegex = new Regex(@"^([a-z]+):([^:\s]+\.json)$",
+                RegexOptions.ECMAScript | RegexOptions.IgnoreCase);
             IDictionary<string, dynamic> modelconfigs = new Dictionary<string, dynamic>();
-            foreach (string key in datas.Keys)
+            for (int index_data = 0; index_data < datas.Length; index_data++)
             {
+                string dataLine = datas[index_data];
+                logArgs["dataLine"] = dataLine;
+                logArgs["index_data"] = index_data;
+                Match dataLineMatch = dataLineRegex.Match(dataLine);
+                if (!dataLineMatch.Success)
+                {
+                    log.Error($"JSON数据文件路径无法识别", logArgs);
+                    return null;
+                }
+                string key = dataLineMatch.Groups[1].Value;
                 logArgs["key"] = key;
-                string path = datas[key];
+                string path = dataLineMatch.Groups[2].Value;
                 logArgs["path"] = path;
                 if (cache_DataJSON.ContainsKey(path))
                 {
@@ -96,7 +110,7 @@ namespace TranslationTemplateCommand
             return info;
         }
 
-        public void OnExecute(DirectoryInfo rootDire, string templatePath, string outputPath, IDictionary<string, string> datas)
+        public void OnExecute(DirectoryInfo rootDire, string templatePath, string outputPath, string[] datas)
         {
             var logArgs = log.CreateArgDictionary();
             logArgs["rootDire.FullName"] = rootDire.FullName;
@@ -158,10 +172,7 @@ namespace TranslationTemplateCommand
                 }
                 Regex lineRegex = new Regex(@"^([^\|\s]+\.liquid)\s+\|\s+([^\|\s]+\.[a-z]+)\s+\|([^\|\s]+)$",
                     RegexOptions.IgnoreCase | RegexOptions.ECMAScript);
-                Regex dataPathRegex = new Regex(@"^(\w+):([^:\s]+.json)$",
-                    RegexOptions.IgnoreCase | RegexOptions.ECMAScript);
                 logArgs["lineRegex"] = lineRegex.ToString();
-                logArgs["dataPathRegex"] = dataPathRegex.ToString();
                 string[] lines = File.ReadAllLines(configFile.FullName, encoding);
                 for (int index_line = 0; index_line < lines.Length; index_line++)
                 {
@@ -181,25 +192,7 @@ namespace TranslationTemplateCommand
                     string dataPathSetString = lineMatch.Groups[3].Value;
                     logArgs["dataSetString"] = line;
                     string[] dataPathSet = Regex.Split(dataPathSetString, @"\s+");
-                    IDictionary<string, string> datas = new Dictionary<string, string>();
-                    for (int index_dataPath = 0; index_dataPath < dataPathSet.Length; index_dataPath++)
-                    {
-                        string dataPath = dataPathSet[index_dataPath];
-                        logArgs["dataPath"] = dataPath;
-                        logArgs["index_dataPath"] = index_dataPath;
-                        Match dataPathMatch = dataPathRegex.Match(dataPath);
-                        if (!dataPathMatch.Success)
-                        {
-                            log.Error("JSON数据文件路径无法识别!", logArgs);
-                            continue;
-                        }
-                        string key = dataPathMatch.Groups[1].Value;
-                        logArgs["dataPath.key"] = dataPath;
-                        string path = dataPathMatch.Groups[2].Value;
-                        logArgs["dataPath.path"] = index_dataPath;
-                        datas[key] = path;
-                    }
-                    OnExecute(rootDire, templatePath, outputPath, datas);
+                    OnExecute(rootDire, templatePath, outputPath, dataPathSet);
                 }
             }
             catch (Exception ex)

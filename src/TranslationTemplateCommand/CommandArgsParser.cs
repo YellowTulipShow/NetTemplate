@@ -23,11 +23,9 @@ namespace TranslationTemplateCommand
         public int OnParser(string[] args)
         {
             Option<DirectoryInfo> rootDireOption = GetOption_RootDire();
-            Option<IDictionary<string, string>> datasOption = GetOption_Datas();
 
             RootCommand rootC = new RootCommand("基于开源项目 Fluid 解释 .liquid 模板, 用于生成文件命令程序");
             rootC.AddGlobalOption(rootDireOption);
-            rootC.AddGlobalOption(datasOption);
 
             Command singleC = GetCommand_Single(rootDireOption);
             rootC.AddCommand(singleC);
@@ -39,7 +37,7 @@ namespace TranslationTemplateCommand
 
         private Option<DirectoryInfo> GetOption_RootDire()
         {
-            return new Option<DirectoryInfo>(
+            var option = new Option<DirectoryInfo>(
                 aliases: new string[] { "-r", "--root" },
                 description: "根目录定义",
                 isDefault: true,
@@ -58,6 +56,8 @@ namespace TranslationTemplateCommand
                     }
                     return new DirectoryInfo(direPath);
                 });
+            option.Arity = ArgumentArity.ExactlyOne;
+            return option;
         }
 
         private Command GetCommand_Single(Option<DirectoryInfo> rootDireOption)
@@ -68,7 +68,7 @@ namespace TranslationTemplateCommand
 
             Command c = new Command("single", "单模板生成输出");
             c.AddOption(datasOption);
-            c.AddOption(outputOption);
+            c.AddOption(templateOption);
             c.AddOption(outputOption);
 
             c.SetHandler((context) =>
@@ -81,13 +81,11 @@ namespace TranslationTemplateCommand
             });
             return c;
         }
-        private Option<IDictionary<string, string>> GetOption_Datas()
+        private Option<string[]> GetOption_Datas()
         {
-            Regex lineRegex = new Regex(@"^(a-z):([^:]+\.json)$",
-                RegexOptions.ECMAScript | RegexOptions.IgnoreCase);
-            return new Option<IDictionary<string, string>>(
+            var option = new Option<string[]>(
                 name: "--data",
-                description: $"数据内容定义, 单参数匹配正则: {lineRegex}",
+                description: $"数据内容定义, 可多个(<key>:<path>)",
                 isDefault: true,
                 parseArgument: result =>
                 {
@@ -96,26 +94,14 @@ namespace TranslationTemplateCommand
                         result.ErrorMessage = "数据内容定义不能为空!";
                         return null;
                     }
-                    IDictionary<string, string> dict = new Dictionary<string, string>();
-                    foreach (var token in result.Tokens)
-                    {
-                        string line = token.Value;
-                        Match match = lineRegex.Match(line);
-                        if (!match.Success)
-                        {
-                            result.ErrorMessage = $"数据内容行参数无法识别: {line}";
-                            return null;
-                        }
-                        string key = match.Groups[1].Value;
-                        string value = match.Groups[2].Value;
-                        dict[key] = value;
-                    }
-                    return dict;
+                    return result.Tokens.Select(b => b.Value).ToArray();
                 });
+            option.Arity = ArgumentArity.OneOrMore;
+            return option;
         }
         private Option<string> GetOption_Template()
         {
-            return new Option<string>(
+            var option = new Option<string>(
                 aliases: new string[] { "-t", "--template" },
                 description: "模板文件定义, 扩展名: .liquid",
                 isDefault: true,
@@ -140,10 +126,12 @@ namespace TranslationTemplateCommand
                     }
                     return path;
                 });
+            option.Arity = ArgumentArity.ExactlyOne;
+            return option;
         }
         private Option<string> GetOption_Output()
         {
-            return new Option<string>(
+            var option = new Option<string>(
                 aliases: new string[] { "-o", "--output" },
                 description: "输出文件路径定义",
                 isDefault: true,
@@ -162,6 +150,8 @@ namespace TranslationTemplateCommand
                     }
                     return path;
                 });
+            option.Arity = ArgumentArity.ExactlyOne;
+            return option;
         }
 
         private Command GetCommand_Batch(Option<DirectoryInfo> rootDireOption)
