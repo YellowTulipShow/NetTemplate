@@ -5,10 +5,6 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TranslationTemplateCommand", "TranslationTemplateCommand\TranslationTemplateCommand.csproj", "{EF8E0F70-F0CE-4F1A-A9B0-B4D0BDD4C370}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandParameterParse", "CommandParameterParse\CommandParameterParse.csproj", "{A8C7B51A-1003-4D7E-8A52-D58EBD497277}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandParameterParse.Test", "CommandParameterParse.Test\CommandParameterParse.Test.csproj", "{AF9CEFA0-7FAA-402E-A9F9-6B243E2C7D4E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,14 +15,6 @@ Global
 		{EF8E0F70-F0CE-4F1A-A9B0-B4D0BDD4C370}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF8E0F70-F0CE-4F1A-A9B0-B4D0BDD4C370}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF8E0F70-F0CE-4F1A-A9B0-B4D0BDD4C370}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A8C7B51A-1003-4D7E-8A52-D58EBD497277}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A8C7B51A-1003-4D7E-8A52-D58EBD497277}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A8C7B51A-1003-4D7E-8A52-D58EBD497277}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A8C7B51A-1003-4D7E-8A52-D58EBD497277}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AF9CEFA0-7FAA-402E-A9F9-6B243E2C7D4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AF9CEFA0-7FAA-402E-A9F9-6B243E2C7D4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AF9CEFA0-7FAA-402E-A9F9-6B243E2C7D4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AF9CEFA0-7FAA-402E-A9F9-6B243E2C7D4E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

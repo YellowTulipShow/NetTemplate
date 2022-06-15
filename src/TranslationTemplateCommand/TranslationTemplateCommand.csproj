@@ -29,8 +29,4 @@
         <PackageReference Include="YTS.Log" Version="0.1.2" />
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\CommandParameterParse\CommandParameterParse.csproj" />
-    </ItemGroup>
-
 </Project>
