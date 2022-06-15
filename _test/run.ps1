@@ -27,7 +27,7 @@ function WriteFileLines([string]$filePath, [string[]]$lines)
     $lines | Out-File -Encoding Default -Force -FilePath $filePath
 }
 
-function CommandExecute_Single()
+function CommandExecute_Batch()
 {
     $lines=@()
     function AddLine([string[]]$lines, [string]$name)
@@ -54,7 +54,7 @@ function CommandExecute_Single()
     Remove-Item -Force -Path $cacheFile
 }
 PrintLineSplit
-CommandExecute_Single
+CommandExecute_Batch
 
 
 # # 打印输出测试用
