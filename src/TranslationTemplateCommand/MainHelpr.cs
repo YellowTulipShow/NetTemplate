@@ -170,7 +170,7 @@ namespace TranslationTemplateCommand
                     log.Error("配置文件查找失败!", logArgs);
                     return;
                 }
-                Regex lineRegex = new Regex(@"^([^\|\s]+\.liquid)\s+\|\s+([^\|\s]+\.[a-z]+)\s+\|([^\|\s]+)$",
+                Regex lineRegex = new Regex(@"^([^\|\s]+\.liquid)\s+\|\s+([^\|\s]+\.[a-z]+)\s+\|\s+([^\|]+)$",
                     RegexOptions.IgnoreCase | RegexOptions.ECMAScript);
                 logArgs["lineRegex"] = lineRegex.ToString();
                 string[] lines = File.ReadAllLines(configFile.FullName, encoding);

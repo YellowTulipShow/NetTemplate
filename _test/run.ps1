@@ -19,13 +19,12 @@ function CommandExecute_Single()
     Write-Host "dotnet run --project ./src/TranslationTemplateCommand/ -- single -r $PWD -t $template_path -o $output_path --data db:$db_json_path --data table:$table_json_path"
     dotnet run --project ./src/TranslationTemplateCommand/ -- single -r $PWD -t $template_path -o $output_path --data db:$db_json_path --data table:$table_json_path
 }
-PrintLineSplit
-CommandExecute_Single
+# PrintLineSplit
+# CommandExecute_Single
 
 function WriteFileLines([string]$filePath, [string[]]$lines)
 {
-    $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
-    [System.IO.File]::WriteAllLines($filePath, $lines, $Utf8NoBomEncoding)
+    $lines | Out-File -Encoding Default -Force -FilePath $filePath
 }
 
 function CommandExecute_Single()
@@ -33,20 +32,29 @@ function CommandExecute_Single()
     $lines=@()
     function AddLine([string[]]$lines, [string]$name)
     {
+        $output = "./_test/output/{0}/{0}Controller.cs" -f $name
+        # Write-Host $output
         $lines += @(
             "./_test/template/_Basic_Controller.cs.liquid",
-            "./_test/output/${$name}/${$name}Controller.cs",
-            "db:./_test/data/db.json",
-            "table:./_test/data/table/${$name}.json"
+            $output,
+            "db:./_test/data/db.json table:./_test/data/table/$name.json"
         ) -join " | "
         return $lines
     }
     $lines = AddLine $lines "AcGoodProductType"
     $lines = AddLine $lines "AcNProductBanner"
-    WriteFileLines "./_test/cache_config.txt" $lines
+
+    $cacheFile = "./_test/cache_config.txt"
+    WriteFileLines $cacheFile $lines
+    Get-Content $cacheFile
+
+    Write-Host "dotnet run --project ./src/TranslationTemplateCommand/ -- batch -r $PWD --config $cacheFile"
+    dotnet run --project ./src/TranslationTemplateCommand/ -- batch -r $PWD --config $cacheFile
+
+    Remove-Item -Force -Path $cacheFile
 }
-# PrintLineSplit
-# CommandExecute_Single
+PrintLineSplit
+CommandExecute_Single
 
 
 # # 打印输出测试用
