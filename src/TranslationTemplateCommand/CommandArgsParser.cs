@@ -213,7 +213,7 @@ namespace TranslationTemplateCommand
                 }
                 catch (Exception ex)
                 {
-                    log.Error("单模板生成输出出错", ex, logArgs);
+                    log.Error("批量生成输出出错", ex, logArgs);
                     context.ExitCode = 1;
                 }
             });
