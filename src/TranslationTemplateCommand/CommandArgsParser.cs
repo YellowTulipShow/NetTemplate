@@ -77,11 +77,7 @@ namespace TranslationTemplateCommand
                 var datas = context.ParseResult.GetValueForOption(datasOption);
                 var template = context.ParseResult.GetValueForOption(templateOption);
                 var output = context.ParseResult.GetValueForOption(outputOption);
-                mainHelpr.OnExecute(rootDire, datas, new TemplateOutputConfig()
-                {
-                    Template = template,
-                    Output = output,
-                });
+                mainHelpr.OnExecute(rootDire, template, output, datas);
             });
             return c;
         }
@@ -170,9 +166,11 @@ namespace TranslationTemplateCommand
 
         private Command GetCommand_Batch(Option<DirectoryInfo> rootDireOption)
         {
-            var listFileOption = new Option<string>(
+            var configFileOption = new Option<string>(
                 aliases: new string[] { "-c", "--config" },
-                description: "批量生成配置文件路径定义, 扩展名: .txt 每行格式: <template>.liquid | <output> | <key>:<path>.json <key>:<path>.json ...",
+                description: "批量生成配置文件路径定义" +
+                    " 扩展名: .txt" +
+                    " 每行格式: <template>.liquid | <output> | <key>:<path>.json <key>:<path>.json ...",
                 isDefault: true,
                 parseArgument: result =>
                 {
@@ -197,11 +195,11 @@ namespace TranslationTemplateCommand
                 });
 
             Command c = new Command("batch", "配置文件批量生成输出");
-            c.AddOption(listFileOption);
+            c.AddOption(configFileOption);
             c.SetHandler((context) =>
             {
                 var rootDire = context.ParseResult.GetValueForOption(rootDireOption);
-                var filePath = context.ParseResult.GetValueForOption(listFileOption);
+                var filePath = context.ParseResult.GetValueForOption(configFileOption);
                 mainHelpr.OnExecute(rootDire, filePath);
             });
             return c;
