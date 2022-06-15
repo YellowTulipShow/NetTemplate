@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.CommandLine;
 
 using YTS.Log;
+using System;
 
 namespace TranslationTemplateCommand
 {
@@ -73,11 +74,24 @@ namespace TranslationTemplateCommand
 
             c.SetHandler((context) =>
             {
-                var rootDire = context.ParseResult.GetValueForOption(rootDireOption);
-                var datas = context.ParseResult.GetValueForOption(datasOption);
-                var template = context.ParseResult.GetValueForOption(templateOption);
-                var output = context.ParseResult.GetValueForOption(outputOption);
-                mainHelpr.OnExecute(rootDire, template, output, datas);
+                var logArgs = log.CreateArgDictionary();
+                try
+                {
+                    var rootDire = context.ParseResult.GetValueForOption(rootDireOption);
+                    logArgs["rootDire.FullName"] = rootDire.FullName;
+                    var datas = context.ParseResult.GetValueForOption(datasOption);
+                    logArgs["datas"] = datas;
+                    var template = context.ParseResult.GetValueForOption(templateOption);
+                    logArgs["template"] = template;
+                    var output = context.ParseResult.GetValueForOption(outputOption);
+                    logArgs["output"] = output;
+                    mainHelpr.OnExecute(rootDire, template, output, datas);
+                }
+                catch (Exception ex)
+                {
+                    log.Error("单模板生成输出出错", ex, logArgs);
+                    context.ExitCode = 1;
+                }
             });
             return c;
         }
@@ -188,9 +202,20 @@ namespace TranslationTemplateCommand
             c.AddOption(configFileOption);
             c.SetHandler((context) =>
             {
-                var rootDire = context.ParseResult.GetValueForOption(rootDireOption);
-                var filePath = context.ParseResult.GetValueForOption(configFileOption);
-                mainHelpr.OnExecute(rootDire, filePath);
+                var logArgs = log.CreateArgDictionary();
+                try
+                {
+                    var rootDire = context.ParseResult.GetValueForOption(rootDireOption);
+                    logArgs["rootDire.FullName"] = rootDire.FullName;
+                    var filePath = context.ParseResult.GetValueForOption(configFileOption);
+                    logArgs["filePath"] = filePath;
+                    mainHelpr.OnExecute(rootDire, filePath);
+                }
+                catch (Exception ex)
+                {
+                    log.Error("单模板生成输出出错", ex, logArgs);
+                    context.ExitCode = 1;
+                }
             });
             return c;
         }

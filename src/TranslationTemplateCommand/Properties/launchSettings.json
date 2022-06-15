@@ -1,7 +1,8 @@
 {
   "profiles": {
     "TranslationTemplateCommand": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "batch -r D:\\Work\\YTS.ErTuiShengShi\\ErTuiShengShi.TemplateCodeGenerate --config ./_output_batch_cache.txt"
     }
   }
 }

@@ -2,11 +2,13 @@
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+using Newtonsoft.Json;
+
+using Fluid;
 
 using YTS.Log;
-using Newtonsoft.Json;
-using Fluid;
-using System.Text.RegularExpressions;
 
 namespace TranslationTemplateCommand
 {
@@ -26,6 +28,7 @@ namespace TranslationTemplateCommand
             cache_FluidTemplate = new Dictionary<string, IFluidTemplate>();
             cache_DataJSON = new Dictionary<string, dynamic>();
         }
+
         private IFluidTemplate ToFluidTemplate(FileInfo templateFile)
         {
             if (cache_FluidTemplate.ContainsKey(templateFile.FullName))
@@ -39,7 +42,7 @@ namespace TranslationTemplateCommand
             {
                 logArgs["FluidParser.ErrorMessage"] = error;
                 log.Error("调用: FluidParser 解释模板与数据失败", logArgs);
-                return null;
+                throw new ArgumentException($"调用: FluidParser 解释模板与数据失败: {templateFile.FullName}");
             }
             cache_FluidTemplate[templateFile.FullName] = template;
             return template;
@@ -63,7 +66,7 @@ namespace TranslationTemplateCommand
                 if (!dataLineMatch.Success)
                 {
                     log.Error($"JSON数据文件路径无法识别", logArgs);
-                    return null;
+                    throw new ArgumentException($"JSON数据文件路径无法识别: {dataLine}");
                 }
                 string key = dataLineMatch.Groups[1].Value;
                 logArgs["key"] = key;
@@ -80,7 +83,7 @@ namespace TranslationTemplateCommand
                 if (model == null)
                 {
                     log.Error("获取JSON数据为空", logArgs);
-                    continue;
+                    throw new FileNotFoundException($"JSON数据文件路径无法识别: {dataLine}");
                 }
                 modelconfigs[key] = model;
                 cache_DataJSON[path] = model;
@@ -117,43 +120,34 @@ namespace TranslationTemplateCommand
             logArgs["datas"] = datas;
             logArgs["templatePath"] = templatePath;
             logArgs["outputPath"] = outputPath;
-            try
-            {
-                FileInfo templateFile = ToFile(templatePath, rootDire.FullName);
-                if (!templateFile.Exists)
-                {
-                    log.Error("模板文件查找失败!", logArgs);
-                    return;
-                }
-                FileInfo traget_file = ToFile(outputPath, rootDire.FullName);
-                if (!traget_file.Exists)
-                {
-                    traget_file.Create().Close();
-                }
-                IFluidTemplate fluidTemplate = ToFluidTemplate(templateFile);
-                if (fluidTemplate == null)
-                {
-                    log.Error("模板编译结果(FluidTemplate) 获取为空!", logArgs);
-                    return;
-                }
-                object dataAggregate = ToModelDatas(datas, rootDire);
-                if (dataAggregate == null)
-                {
-                    log.Error("数据集合(dataAggregate) 获取为空!", logArgs);
-                    return;
-                }
-                //string model_json = JsonConvert.SerializeObject(modelconfigs);
-                //dynamic model = JsonConvert.DeserializeObject<dynamic>(model_json);
 
-                var context = new TemplateContext(dataAggregate);
-                string result_content = fluidTemplate.Render(context);
-                File.WriteAllText(traget_file.FullName, result_content, encoding);
-                log.Info($"Generate File Success: {traget_file.FullName}");
-            }
-            catch (Exception ex)
+            FileInfo templateFile = ToFile(templatePath, rootDire.FullName);
+            if (!templateFile.Exists)
             {
-                log.Error("单条执行转换出错!", ex, logArgs);
+                log.Error("模板文件查找失败!", logArgs);
+                throw new FileNotFoundException($"模板文件查找失败: {templateFile.FullName}");
             }
+            FileInfo traget_file = ToFile(outputPath, rootDire.FullName);
+            if (!traget_file.Exists)
+            {
+                traget_file.Create().Close();
+            }
+            IFluidTemplate fluidTemplate = ToFluidTemplate(templateFile);
+            if (fluidTemplate == null)
+            {
+                log.Error("模板编译结果(FluidTemplate) 获取为空!", logArgs);
+                throw new ArgumentNullException($"模板编译结果(FluidTemplate) 获取为空: {templateFile.FullName}");
+            }
+            object dataAggregate = ToModelDatas(datas, rootDire);
+            if (dataAggregate == null)
+            {
+                log.Error("数据集合(dataAggregate) 获取为空!", logArgs);
+                throw new ArgumentNullException($"数据集合(dataAggregate) 获取为空!");
+            }
+            var context = new TemplateContext(dataAggregate);
+            string result_content = fluidTemplate.Render(context);
+            File.WriteAllText(traget_file.FullName, result_content, encoding);
+            log.Info($"Generate File Success: {traget_file.FullName}");
         }
 
         public void OnExecute(DirectoryInfo rootDire, string configPath)
@@ -161,43 +155,37 @@ namespace TranslationTemplateCommand
             var logArgs = log.CreateArgDictionary();
             logArgs["rootDire.FullName"] = rootDire.FullName;
             logArgs["configPath"] = configPath;
-            try
+
+            FileInfo configFile = ToFile(configPath, rootDire.FullName);
+            logArgs["configFile"] = configFile.FullName;
+            if (!configFile.Exists)
             {
-                FileInfo configFile = ToFile(configPath, rootDire.FullName);
-                logArgs["configFile"] = configFile;
-                if (!configFile.Exists)
-                {
-                    log.Error("配置文件查找失败!", logArgs);
-                    return;
-                }
-                Regex lineRegex = new Regex(@"^([^\|\s]+\.liquid)\s+\|\s+([^\|\s]+\.[a-z]+)\s+\|\s+([^\|]+)$",
-                    RegexOptions.IgnoreCase | RegexOptions.ECMAScript);
-                logArgs["lineRegex"] = lineRegex.ToString();
-                string[] lines = File.ReadAllLines(configFile.FullName, encoding);
-                for (int index_line = 0; index_line < lines.Length; index_line++)
-                {
-                    string line = lines[index_line];
-                    logArgs["line"] = line;
-                    logArgs["index_line"] = index_line;
-                    Match lineMatch = lineRegex.Match(line);
-                    if (!lineMatch.Success)
-                    {
-                        log.Error("单行无法识别!", logArgs);
-                        continue;
-                    }
-                    string templatePath = lineMatch.Groups[1].Value;
-                    logArgs["templatePath"] = line;
-                    string outputPath = lineMatch.Groups[2].Value;
-                    logArgs["outputPath"] = line;
-                    string dataPathSetString = lineMatch.Groups[3].Value;
-                    logArgs["dataSetString"] = line;
-                    string[] dataPathSet = Regex.Split(dataPathSetString, @"\s+");
-                    OnExecute(rootDire, templatePath, outputPath, dataPathSet);
-                }
+                log.Error("配置文件查找失败!", logArgs);
+                throw new FileNotFoundException($"配置文件查找失败: {configFile.FullName}");
             }
-            catch (Exception ex)
+            Regex lineRegex = new Regex(@"^([^\|\s]+\.liquid)\s+\|\s+([^\|\s]+\.[a-z]+)\s+\|\s+([^\|]+)$",
+                RegexOptions.IgnoreCase | RegexOptions.ECMAScript);
+            logArgs["lineRegex"] = lineRegex.ToString();
+            string[] lines = File.ReadAllLines(configFile.FullName, encoding);
+            for (int index_line = 0; index_line < lines.Length; index_line++)
             {
-                log.Error("批量模板执行转换出错!", ex, logArgs);
+                string line = lines[index_line];
+                logArgs["line"] = line;
+                logArgs["index_line"] = index_line;
+                Match lineMatch = lineRegex.Match(line);
+                if (!lineMatch.Success)
+                {
+                    log.Error("单行无法识别!", logArgs);
+                    throw new ArgumentException($"单行无法识别: {line}");
+                }
+                string templatePath = lineMatch.Groups[1].Value;
+                logArgs["templatePath"] = line;
+                string outputPath = lineMatch.Groups[2].Value;
+                logArgs["outputPath"] = line;
+                string dataPathSetString = lineMatch.Groups[3].Value;
+                logArgs["dataSetString"] = line;
+                string[] dataPathSet = Regex.Split(dataPathSetString, @"\s+");
+                OnExecute(rootDire, templatePath, outputPath, dataPathSet);
             }
         }
     }

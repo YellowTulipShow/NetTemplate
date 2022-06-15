@@ -10,21 +10,21 @@ namespace TranslationTemplateCommand
         static int Main(string[] args)
         {
             Encoding encoding = Encoding.UTF8;
-
-            var logFile = ILogExtend.GetLogFilePath("Program");
-            ILog log = new FilePrintLog(logFile, encoding).Connect(new ConsolePrintLog());
-            var logArgs = log.CreateArgDictionary();
-            logArgs["CommandInputArgs"] = args;
-
             try
             {
+                var logFile = ILogExtend.GetLogFilePath("Program");
+                ILog log = new FilePrintLog(logFile, encoding).Connect(new ConsolePrintLog());
+                var logArgs = log.CreateArgDictionary();
+                logArgs["CommandInputArgs"] = args;
+
                 MainHelpr mainHelpr = new MainHelpr(log);
                 CommandArgsParser commandArgsParser = new CommandArgsParser(log, mainHelpr);
                 return commandArgsParser.OnParser(args);
             }
             catch (Exception ex)
             {
-                log.Error("执行程序出错!", ex, logArgs);
+                Console.WriteLine($"程序出错: {ex.Message}");
+                Console.WriteLine($"堆栈信息: {ex.StackTrace ?? string.Empty}");
                 return 1;
             }
         }
