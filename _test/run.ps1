@@ -16,8 +16,8 @@ function CommandExecute_Single()
     $db_json_path = "./_test/data/db.json"
     $table_json_path = "./_test/data/table/AcGoodProductType.json"
 
-    Write-Host "dotnet run --project ./src/TranslationTemplateCommand/ -- single -r $PWD -t $template_path -o $output_path --data db:$db_json_path --data table:$table_json_path"
-    dotnet run --project ./src/TranslationTemplateCommand/ -- single -r $PWD -t $template_path -o $output_path --data db:$db_json_path --data table:$table_json_path
+    Write-Host "dotnet run --project ./src/TranslationTemplateCommand/ -- single -r $PWD -t $template_path -o $output_path --data db:$db_json_path table:$table_json_path"
+    dotnet run --project ./src/TranslationTemplateCommand/ -- single -r $PWD -t $template_path -o $output_path --data db:$db_json_path table:$table_json_path
 }
 # PrintLineSplit
 # CommandExecute_Single

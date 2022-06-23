@@ -111,6 +111,7 @@ namespace TranslationTemplateCommand
                     return result.Tokens.Select(b => b.Value).ToArray();
                 });
             option.Arity = ArgumentArity.OneOrMore;
+            option.AllowMultipleArgumentsPerToken = true;
             return option;
         }
         private Option<string> GetOption_Template()
